@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, TrendingUp, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { Mail, Phone, Twitter, Linkedin, Facebook } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -7,13 +7,12 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-2 mb-6">
-               <div className="bg-white text-brand-blue p-1.5 rounded-md">
-                 <TrendingUp className="h-5 w-5" />
-               </div>
-               <span className="font-bold text-xl text-white tracking-tight">
-                 WEALTHY<span className="text-brandRed">4</span>EVER
-               </span>
+            <div className="mb-6">
+              <img 
+                src="/logo_with_text.png" 
+                alt="Wealthy4ever" 
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-6">
               Empowering families to build generational wealth through disciplined investment strategies and smart financial planning.
@@ -47,19 +46,25 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-6">Contact Us</h3>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-sm group">
-                <MapPin className="h-5 w-5 text-brandRed mt-0.5" />
-                <span className="group-hover:text-white transition-colors">
-                  Wealthy4ever Towers,<br/>Financial District, Mumbai - 400051
-                </span>
-              </li>
               <li className="flex items-center gap-3 text-sm group">
                 <Phone className="h-5 w-5 text-brandRed" />
-                <span className="group-hover:text-white transition-colors">+91 98765 43210</span>
+                <a 
+                  href="https://wa.me/919819169655" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group-hover:text-white transition-colors hover:underline"
+                >
+                  +91 9819169655
+                </a>
               </li>
               <li className="flex items-center gap-3 text-sm group">
                 <Mail className="h-5 w-5 text-brandRed" />
-                <span className="group-hover:text-white transition-colors">advisor@wealthy4ever.in</span>
+                <a 
+                  href="mailto:nikunj.w4e@gmail.com"
+                  className="group-hover:text-white transition-colors hover:underline"
+                >
+                  nikunj.w4e@gmail.com
+                </a>
               </li>
             </ul>
           </div>

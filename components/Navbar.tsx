@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, TrendingUp, Calculator } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,6 +8,7 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
+    { name: 'About Us', path: '/about' },
     { name: 'Financial Tools', path: '/tools' },
   ];
 
@@ -16,15 +17,14 @@ const Navbar: React.FC = () => {
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
+        <div className="flex justify-between h-24">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center gap-2 group">
-              <div className="bg-brand-blue text-white p-2 rounded-lg transform group-hover:scale-105 transition-transform">
-                 <TrendingUp className="h-6 w-6" />
-              </div>
-              <span className="font-bold text-2xl tracking-tight text-brand-blue">
-                WEALTHY<span className="text-brandRed">4</span>EVER
-              </span>
+            <Link to="/" className="flex-shrink-0 flex items-center group">
+              <img 
+                src="/logo_with_text.png" 
+                alt="Wealthy4ever" 
+                className="h-16 md:h-20 w-auto transform group-hover:scale-105 transition-transform"
+              />
             </Link>
           </div>
           
@@ -42,9 +42,14 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
-            <button className="bg-brandRed text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-red-500/30 hover:bg-brandRed-hover transition-colors">
+            <a 
+              href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20book%20a%20consultation"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-brandRed text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-red-500/30 hover:bg-brandRed-hover transition-colors"
+            >
               Book Consultation
-            </button>
+            </a>
           </div>
 
           <div className="md:hidden flex items-center">
@@ -76,9 +81,14 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
-            <button className="w-full mt-4 bg-brandRed text-white px-5 py-3 rounded-lg text-base font-bold shadow-md">
+            <a 
+              href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20book%20a%20consultation"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full mt-4 bg-brandRed text-white px-5 py-3 rounded-lg text-base font-bold shadow-md text-center"
+            >
               Book Consultation
-            </button>
+            </a>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Shield, PieChart, TrendingUp, Users, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, BarChart3, Shield, PieChart, TrendingUp, CheckCircle2, Handshake } from 'lucide-react';
 
 const Home: React.FC = () => {
   return (
@@ -17,7 +17,7 @@ const Home: React.FC = () => {
           <div className="text-left z-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-800/50 border border-blue-400/30 text-blue-100 text-sm font-medium mb-6">
               <span className="flex h-2 w-2 rounded-full bg-brandRed"></span>
-              Trusted by 500+ Families
+              Trusted by 850+ Families Since 1998
             </div>
             <h1 className="text-4xl lg:text-6xl font-bold text-white leading-tight mb-6">
               Optimize Your Growth With <br/>
@@ -35,9 +35,14 @@ const Home: React.FC = () => {
               >
                 Use Free Tools
               </Link>
-              <button className="inline-flex justify-center items-center px-8 py-4 bg-brandRed text-white font-bold rounded-xl hover:bg-brandRed-hover transition-all shadow-lg shadow-red-900/20">
+              <a 
+                href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20get%20started%20with%20Wealthy4ever"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex justify-center items-center px-8 py-4 bg-brandRed text-white font-bold rounded-xl hover:bg-brandRed-hover transition-all shadow-lg shadow-red-900/20"
+              >
                 Get Started
-              </button>
+              </a>
             </div>
           </div>
           
@@ -80,14 +85,26 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Trusted By Section */}
-      <div className="bg-white py-10 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-slate-400 font-medium mb-6">TRUSTED PARTNER FOR GROWING TEAMS</p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale">
-            {['Oracle', 'Sony', 'Samsung', 'Tata', 'Reliance'].map((brand) => (
-               <span key={brand} className="text-xl font-bold text-slate-400">{brand}</span>
-            ))}
+      {/* Stats Section */}
+      <div className="bg-white py-16 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <p className="text-4xl md:text-5xl font-bold text-brand-blue mb-2">₹75Cr+</p>
+              <p className="text-slate-600 text-sm">Assets Under Management</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl md:text-5xl font-bold text-brand-blue mb-2">850+</p>
+              <p className="text-slate-600 text-sm">Families Trusting Us</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl md:text-5xl font-bold text-brand-blue mb-2">₹400Cr+</p>
+              <p className="text-slate-600 text-sm">Insurance Book Size</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl md:text-5xl font-bold text-brand-blue mb-2">3000+</p>
+              <p className="text-slate-600 text-sm">Claims Settled</p>
+            </div>
           </div>
         </div>
       </div>
@@ -105,41 +122,86 @@ const Home: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1 */}
+          {/* Card 1 - Financial Advisory */}
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
             <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
               <PieChart size={28} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">Portfolio Management</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Financial Advisory</h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              Diversify your investments across equity, debt, and gold to minimize risk and maximize returns tailored to your risk profile.
+              Comprehensive financial planning, wealth creation strategies, goal-based investing, and strategic asset allocation tailored to your needs.
             </p>
-            <div className="text-brand-blue font-semibold flex items-center gap-1">Learn More <ArrowRight size={16}/></div>
+            <Link to="/about" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></Link>
           </div>
 
-          {/* Card 2 */}
+          {/* Card 2 - Insurance Solutions */}
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-brandRed text-white text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAR</div>
-            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
-              <BarChart3 size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">SIP & Compounding</h3>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              Discover the magic of compounding. Even small monthly investments can grow into a significant corpus over time.
-            </p>
-            <Link to="/tools" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Calculate Returns <ArrowRight size={16}/></Link>
-          </div>
-
-          {/* Card 3 */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
+            <div className="absolute top-0 right-0 bg-brandRed text-white text-xs font-bold px-3 py-1 rounded-bl-lg">99.8% CLAIMS</div>
             <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
               <Shield size={28} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">Retirement Planning</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Insurance Solutions</h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              Ensure your golden years are stress-free. We help you calculate exactly how much you need to maintain your lifestyle.
+              Life, health, personal accident, critical illness, fire, marine, and corporate insurance with 100% life insurance claim settlement.
             </p>
-            <Link to="/tools" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Start Planning <ArrowRight size={16}/></Link>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20about%20insurance%20solutions" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Get Protected <ArrowRight size={16}/></a>
+          </div>
+
+          {/* Card 3 - Investment Products */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
+            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
+              <BarChart3 size={28} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Investment Products</h3>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Mutual Funds, Portfolio Management Services (PMS), Fixed Deposits, and our exclusive MARS (Mutual Funds Automated Reallocation System).
+            </p>
+            <Link to="/tools" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Calculate Returns <ArrowRight size={16}/></Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Trusted Partnerships Section */}
+      <div className="bg-slate-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 text-brand-blue mb-4">
+              <Handshake size={24} />
+              <span className="text-sm font-bold tracking-wider uppercase">Our Partners</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
+              Trusted Partnerships with India's Leading Insurers
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span className="h-2 w-2 bg-brand-blue rounded-full"></span>
+                Life Insurance Partners
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {['LIC', 'TATA AIA', 'ICICI Prudential', 'HDFC Life', 'Kotak Life'].map((partner) => (
+                  <span key={partner} className="px-4 py-2 bg-blue-50 text-brand-blue rounded-full text-sm font-medium">
+                    {partner}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span className="h-2 w-2 bg-brandRed rounded-full"></span>
+                General Insurance Partners
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {['New India Assurance', 'Bajaj Allianz', 'HDFC ERGO', 'Star Health', 'TATA AIG'].map((partner) => (
+                  <span key={partner} className="px-4 py-2 bg-red-50 text-brandRed rounded-full text-sm font-medium">
+                    {partner}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -160,9 +222,14 @@ const Home: React.FC = () => {
               </div>
               
               <div className="relative z-10 flex flex-col sm:flex-row gap-4">
-                 <button className="bg-white text-brand-blue font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-blue-50 transition-colors">
+                 <a 
+                   href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20talk%20to%20an%20advisor"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="bg-white text-brand-blue font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-blue-50 transition-colors"
+                 >
                     Talk to an Advisor
-                 </button>
+                 </a>
               </div>
            </div>
         </div>
