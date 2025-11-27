@@ -28,8 +28,7 @@ const TOOLS: ToolConfig[] = [
   { id: 'lumpsum', label: 'Lumpsum Growth', category: 'Investment', icon: DollarSign },
   { id: 'retirement-accum', label: 'Retirement Planner', category: 'Investment', icon: Briefcase },
   // Withdrawal
-  { id: 'swp', label: 'SWP Generator', category: 'Withdrawal', icon: TrendingUp },
-  { id: 'retirement-dist', label: 'Retirement Income', category: 'Withdrawal', icon: Briefcase },
+  { id: 'swp', label: 'SWP / Retirement Calculator', category: 'Withdrawal', icon: TrendingUp },
   // Loans
   { id: 'emi', label: 'EMI Calculator', category: 'Loans', icon: CalcIcon },
   { id: 'home-afford', label: 'Home Affordability', category: 'Loans', icon: Home },
@@ -159,7 +158,6 @@ const Calculator: React.FC = () => {
       case 'lumpsum': return <LumpsumCalculator showAdvanced={showAdvanced} />;
       case 'retirement-accum': return <RetirementAccumulation showAdvanced={showAdvanced} />;
       case 'swp': return <SWPCalculator showAdvanced={showAdvanced} />;
-      case 'retirement-dist': return <RetirementDistribution showAdvanced={showAdvanced} />;
       case 'emi': return <EMICalculator showAdvanced={showAdvanced} />;
       case 'home-afford': return <HomeAffordability showAdvanced={showAdvanced} />;
       case 'insurance': return <InsuranceCalculator />;
@@ -232,7 +230,7 @@ const Calculator: React.FC = () => {
                Calculate, plan, and optimize your financial future.
              </p>
            </div>
-           {['sip', 'lumpsum', 'swp', 'emi', 'retirement-accum', 'retirement-dist', 'home-afford'].includes(activeTool) && (
+           {['sip', 'lumpsum', 'swp', 'emi', 'retirement-accum', 'home-afford'].includes(activeTool) && (
              <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500 font-medium">Advanced Mode</span>
@@ -278,111 +276,413 @@ const Calculator: React.FC = () => {
 // INDIVIDUAL CALCULATOR COMPONENTS
 // ==========================================
 
-// 1. RISK PROFILER
-const RiskProfiler = () => {
-  const [age, setAge] = useState(30);
-  const [horizon, setHorizon] = useState(10);
-  const [attitude, setAttitude] = useState<'conservative'|'moderate'|'aggressive'>('moderate');
+// 1. RISK PROFILER - Quiz-based assessment
+interface QuizQuestion {
+  id: number;
+  question: string;
+  options: { label: string; score: number }[];
+}
 
-  const params = { age, horizon, attitude };
-  const setters = { age: setAge, horizon: setHorizon, attitude: setAttitude };
-  const { generateShareUrl } = useUrlParams('risk-profile', params, setters);
+const RISK_QUIZ_QUESTIONS: QuizQuestion[] = [
+  {
+    id: 1,
+    question: "How old are you?",
+    options: [
+      { label: "Under 35 years", score: 4 },
+      { label: "35-44 years", score: 3 },
+      { label: "45-54 years", score: 2 },
+      { label: "55 years or above", score: 1 },
+    ],
+  },
+  {
+    id: 2,
+    question: "What is the nature of your income?",
+    options: [
+      { label: "Self Employed with steady cash flow", score: 3 },
+      { label: "Salaried Employee with established firm", score: 4 },
+      { label: "Self Employed with irregular cash flow", score: 1 },
+      { label: "Salaried Employee with Startup", score: 2 },
+    ],
+  },
+  {
+    id: 3,
+    question: "How much of your current income goes towards servicing loans?",
+    options: [
+      { label: "30-50%", score: 2 },
+      { label: "More than 50%", score: 1 },
+      { label: "10-30%", score: 3 },
+      { label: "0-10%", score: 4 },
+    ],
+  },
+  {
+    id: 4,
+    question: "How soon do you think you will start dipping into your investments?",
+    options: [
+      { label: "Not for another 10 years", score: 4 },
+      { label: "Within next 3 years", score: 1 },
+      { label: "In 3-7 years", score: 2 },
+      { label: "In 8-10 years", score: 3 },
+    ],
+  },
+  {
+    id: 5,
+    question: "If market corrects and one of your investments loses 30% within weeks, what would you do?",
+    options: [
+      { label: "Sell the investments to avoid further decline", score: 1 },
+      { label: "Buy more - it looks better at current prices", score: 3 },
+      { label: "Hold on and wait for it to bounce back", score: 2 },
+    ],
+  },
+  {
+    id: 6,
+    question: "If market downfall continues, how long will you hold before cashing in?",
+    options: [
+      { label: "Another 6 months", score: 3 },
+      { label: "At least a year", score: 4 },
+      { label: "A month", score: 1 },
+      { label: "Another 3 months", score: 2 },
+    ],
+  },
+  {
+    id: 7,
+    question: "If you have surplus now, how would you be willing to invest?",
+    options: [
+      { label: "Wait for market to recover 20%", score: 2 },
+      { label: "Invest in stock markets? No thanks, I'm out", score: 1 },
+      { label: "Deploy some money in a staggered manner even if markets dip further", score: 3 },
+      { label: "I don't mind putting in large chunk of surplus right away", score: 4 },
+    ],
+  },
+  {
+    id: 8,
+    question: "Which outcome is most acceptable to you?",
+    options: [
+      { label: "Avg: 7.5% | Best: 12% | Worst: -5%", score: 1 },
+      { label: "Avg: 9% | Best: 18% | Worst: -12%", score: 2 },
+      { label: "Avg: 12% | Best: 25% | Worst: -20%", score: 3 },
+      { label: "Avg: 15% | Best: 40% | Worst: -35%", score: 4 },
+    ],
+  },
+];
+
+const getRiskProfile = (score: number) => {
+  if (score < 20) {
+    return {
+      profile: "Conservative",
+      equityRange: "10-25%",
+      debtRange: "75-90%",
+      equityMid: 17.5,
+      color: "text-green-600",
+      bg: "bg-green-50",
+      borderColor: "border-green-200",
+      description: "You prioritize capital preservation over high returns. Focus on stable, low-risk investments.",
+    };
+  } else if (score <= 25) {
+    return {
+      profile: "Moderate",
+      equityRange: "40-60%",
+      debtRange: "40-60%",
+      equityMid: 50,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      borderColor: "border-blue-200",
+      description: "You seek a balance between growth and stability. A diversified portfolio suits you best.",
+    };
+  } else if (score <= 30) {
+    return {
+      profile: "Aggressive",
+      equityRange: "60-80%",
+      debtRange: "20-40%",
+      equityMid: 70,
+      color: "text-orange-600",
+      bg: "bg-orange-50",
+      borderColor: "border-orange-200",
+      description: "You are willing to accept higher volatility for potentially greater long-term returns.",
+    };
+  } else {
+    return {
+      profile: "Very Aggressive",
+      equityRange: "80-100%",
+      debtRange: "0-20%",
+      equityMid: 90,
+      color: "text-red-600",
+      bg: "bg-red-50",
+      borderColor: "border-red-200",
+      description: "You have high risk tolerance and seek maximum growth. You can handle significant market swings.",
+    };
+  }
+};
+
+const RiskProfiler = () => {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<(number | null)[]>(new Array(RISK_QUIZ_QUESTIONS.length).fill(null));
+  const [showResults, setShowResults] = useState(false);
+
+  const totalScore = useMemo(() => {
+    return answers.reduce((sum: number, ans, idx) => {
+      if (ans !== null) {
+        return sum + RISK_QUIZ_QUESTIONS[idx].options[ans].score;
+      }
+      return sum;
+    }, 0);
+  }, [answers]);
+
+  const riskProfile = useMemo(() => getRiskProfile(totalScore), [totalScore]);
+
+  const allAnswered = answers.every((a) => a !== null);
+
+  const handleAnswer = (optionIndex: number) => {
+    const newAnswers = [...answers];
+    newAnswers[currentQuestion] = optionIndex;
+    setAnswers(newAnswers);
+  };
+
+  const goNext = () => {
+    if (currentQuestion < RISK_QUIZ_QUESTIONS.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    }
+  };
+
+  const goPrev = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const handleShowResults = () => {
+    setShowResults(true);
+  };
+
+  const handleRestart = () => {
+    setAnswers(new Array(RISK_QUIZ_QUESTIONS.length).fill(null));
+    setCurrentQuestion(0);
+    setShowResults(false);
+  };
 
   const allocation = useMemo(() => {
-    let equity = 0;
-    // Simple rule of thumb: 100 - age, adjusted by attitude
-    let baseEquity = Math.max(0, 110 - age); // slightly aggressive base
-    
-    if (attitude === 'conservative') baseEquity -= 20;
-    if (attitude === 'aggressive') baseEquity += 10;
-    
-    // Horizon adjustment
-    if (horizon < 3) baseEquity = Math.min(baseEquity, 20);
-    else if (horizon < 5) baseEquity = Math.min(baseEquity, 40);
-
-    equity = Math.min(Math.max(baseEquity, 0), 100);
-    const debt = 100 - equity;
-    
+    const equity = riskProfile.equityMid;
     return [
-      { name: 'Equity', value: equity },
-      { name: 'Debt/Fixed Income', value: debt },
+      { name: "Equity", value: equity },
+      { name: "Debt/Fixed Income", value: 100 - equity },
     ];
-  }, [age, horizon, attitude]);
+  }, [riskProfile]);
 
-  const getLabel = () => {
-    const eq = allocation[0].value;
-    if (eq > 75) return { text: 'Aggressive Growth', color: 'text-red-600', bg: 'bg-red-50' };
-    if (eq > 50) return { text: 'Balanced Growth', color: 'text-blue-600', bg: 'bg-blue-50' };
-    if (eq > 30) return { text: 'Moderate Stability', color: 'text-yellow-600', bg: 'bg-yellow-50' };
-    return { text: 'Conservative Income', color: 'text-green-600', bg: 'bg-green-50' };
-  };
+  // Results View
+  if (showResults) {
+    return (
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Left: Score Breakdown */}
+        <div className="card-input space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-slate-800">Your Responses</h3>
+            <button
+              onClick={handleRestart}
+              className="px-4 py-2 text-sm font-medium text-brand-blue bg-blue-50 rounded-lg hover:bg-blue-100 transition-all"
+            >
+              Retake Quiz
+            </button>
+          </div>
 
-  const labelStyle = getLabel();
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+            {RISK_QUIZ_QUESTIONS.map((q, idx) => {
+              const selectedOption = answers[idx] !== null ? q.options[answers[idx]!] : null;
+              return (
+                <div key={q.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-blue text-white text-sm font-bold flex items-center justify-center">
+                      {q.id}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm text-slate-600 mb-1">{q.question}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-slate-800">
+                          {selectedOption?.label || "Not answered"}
+                        </span>
+                        <span className="text-xs font-bold text-brand-blue bg-blue-50 px-2 py-1 rounded">
+                          +{selectedOption?.score || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(generateShareUrl());
-  };
+          <div className="pt-4 border-t border-slate-200">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-slate-700">Total Score</span>
+              <span className="text-2xl font-extrabold text-brand-blue">{totalScore} / 32</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Results */}
+        <div className="card-result flex flex-col items-center justify-center text-center p-8 lg:sticky lg:top-24">
+          <div className={`px-6 py-3 rounded-full font-bold text-lg mb-6 ${riskProfile.bg} ${riskProfile.color} border ${riskProfile.borderColor}`}>
+            {riskProfile.profile} Investor
+          </div>
+
+          <div className="h-56 w-full mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={allocation}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={75}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  <Cell fill="#0047AB" />
+                  <Cell fill="#94a3b8" />
+                </Pie>
+                <Tooltip formatter={(val: number) => `${val}%`} />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="w-full space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center">
+                <div className="text-xs text-blue-600 uppercase font-bold mb-1">Equity</div>
+                <div className="text-xl font-bold text-brand-blue">{riskProfile.equityRange}</div>
+              </div>
+              <div className="p-4 bg-slate-100 rounded-xl border border-slate-200 text-center">
+                <div className="text-xs text-slate-500 uppercase font-bold mb-1">Debt</div>
+                <div className="text-xl font-bold text-slate-700">{riskProfile.debtRange}</div>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600 leading-relaxed">{riskProfile.description}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Quiz View
+  const question = RISK_QUIZ_QUESTIONS[currentQuestion];
+  const progress = ((currentQuestion + 1) / RISK_QUIZ_QUESTIONS.length) * 100;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8">
-      <div className="card-input">
-        <div className="flex justify-end mb-4">
-          <ShareButton onClick={handleShare} />
+    <div className="max-w-3xl mx-auto">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-slate-600">
+            Question {currentQuestion + 1} of {RISK_QUIZ_QUESTIONS.length}
+          </span>
+          <span className="text-sm font-bold text-brand-blue">{Math.round(progress)}% Complete</span>
         </div>
-        <InputSlider label="Current Age" value={age} setValue={setAge} min={18} max={80} unit="Yrs" />
-        <InputSlider label="Investment Horizon" value={horizon} setValue={setHorizon} min={1} max={40} unit="Yrs" />
-        
-        <div className="mt-6">
-          <label className="block text-sm font-bold text-slate-700 mb-3">Risk Attitude</label>
-          <div className="grid grid-cols-3 gap-2">
-            {(['conservative', 'moderate', 'aggressive'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setAttitude(t)}
-                className={`py-3 px-2 rounded-lg text-sm font-bold capitalize transition-all border-2
-                  ${attitude === t ? 'border-brand-blue bg-blue-50 text-brand-blue' : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-slate-500 mt-2">
-            {attitude === 'conservative' && "You prioritize safety of capital over high returns."}
-            {attitude === 'moderate' && "You want a balance between growth and stability."}
-            {attitude === 'aggressive' && "You are willing to take risks for maximum long-term growth."}
-          </p>
+        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-brand-blue transition-all duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
-      <div className="card-result flex flex-col items-center justify-center text-center p-8 lg:sticky lg:top-24">
-        <div className={`px-4 py-2 rounded-full font-bold text-sm mb-6 ${labelStyle.bg} ${labelStyle.color}`}>
-          {labelStyle.text}
+      {/* Question Card */}
+      <div className="card-input p-8">
+        <div className="flex items-center gap-4 mb-6">
+          <span className="flex-shrink-0 w-12 h-12 rounded-full bg-brand-blue text-white text-xl font-bold flex items-center justify-center">
+            {question.id}
+          </span>
+          <h2 className="text-xl font-bold text-slate-800">{question.question}</h2>
         </div>
-        
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={allocation}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
+
+        {/* Options */}
+        <div className="space-y-3 mb-8">
+          {question.options.map((option, idx) => {
+            const isSelected = answers[currentQuestion] === idx;
+            return (
+              <button
+                key={idx}
+                onClick={() => handleAnswer(idx)}
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200
+                  ${isSelected
+                    ? "border-brand-blue bg-blue-50 shadow-md"
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  }`}
               >
-                <Cell fill="#0047AB" />
-                <Cell fill="#94a3b8" />
-              </Pie>
-              <Tooltip formatter={(val: number) => `${val}%`} />
-              <Legend verticalAlign="bottom" height={36}/>
-            </PieChart>
-          </ResponsiveContainer>
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
+                      ${isSelected ? "border-brand-blue bg-brand-blue" : "border-slate-300"}`}
+                  >
+                    {isSelected && (
+                      <Check size={14} className="text-white" />
+                    )}
+                  </div>
+                  <span className={`text-base ${isSelected ? "font-semibold text-brand-blue" : "text-slate-700"}`}>
+                    {option.label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
-        
-        <div className="mt-6 text-sm text-slate-600">
-          Suggested Allocation: <strong>{allocation[0].value}% Equity</strong> and <strong>{allocation[1].value}% Debt</strong>.
+
+        {/* Navigation */}
+        <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+          <button
+            onClick={goPrev}
+            disabled={currentQuestion === 0}
+            className={`px-6 py-3 rounded-lg font-medium transition-all
+              ${currentQuestion === 0
+                ? "text-slate-300 cursor-not-allowed"
+                : "text-slate-600 hover:bg-slate-100"
+              }`}
+          >
+            Previous
+          </button>
+
+          {currentQuestion < RISK_QUIZ_QUESTIONS.length - 1 ? (
+            <button
+              onClick={goNext}
+              disabled={answers[currentQuestion] === null}
+              className={`px-6 py-3 rounded-lg font-bold transition-all
+                ${answers[currentQuestion] === null
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-brand-blue text-white hover:bg-blue-700 shadow-md"
+                }`}
+            >
+              Next Question
+            </button>
+          ) : (
+            <button
+              onClick={handleShowResults}
+              disabled={!allAnswered}
+              className={`px-6 py-3 rounded-lg font-bold transition-all
+                ${!allAnswered
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700 shadow-md"
+                }`}
+            >
+              View Results
+            </button>
+          )}
         </div>
+      </div>
+
+      {/* Question Navigation Dots */}
+      <div className="flex justify-center gap-2 mt-6">
+        {RISK_QUIZ_QUESTIONS.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentQuestion(idx)}
+            className={`w-3 h-3 rounded-full transition-all
+              ${idx === currentQuestion
+                ? "bg-brand-blue scale-125"
+                : answers[idx] !== null
+                ? "bg-green-500"
+                : "bg-slate-300 hover:bg-slate-400"
+              }`}
+          />
+        ))}
       </div>
     </div>
   );
@@ -948,8 +1248,8 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
     let years = 0;
     let totalWithdrawn = 0;
 
-    // Simulate for max 40 years
-    for (let m = 1; m <= 480; m++) {
+    // Simulate for max 100 years
+    for (let m = 1; m <= 1200; m++) {
       if (balance <= 0) break;
       
       // Interest accrues
@@ -1012,19 +1312,7 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
   );
 };
 
-// 6. RETIREMENT DISTRIBUTION (Similar to SWP but focused)
-const RetirementDistribution = ({ showAdvanced }: { showAdvanced: boolean }) => {
-  return (
-    <div>
-      <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100 text-sm text-blue-800">
-        <strong>Planning Tip:</strong> This tool helps you see how long your retirement savings will last given your monthly expenses and inflation.
-      </div>
-      <SWPCalculator showAdvanced={showAdvanced} />
-    </div>
-  );
-};
-
-// 7. EMI CALCULATOR
+// 6. EMI CALCULATOR
 const EMICalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const [loan, setLoan] = useState(5000000);
   const [rate, setRate] = useState(8.5);
