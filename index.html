@@ -31,7 +31,16 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-K2BKTVN3CS');
+      // Check if this is a redirect from 404.html
+      var urlParams = new URLSearchParams(window.location.search);
+      var hasRedirectParam = urlParams.has('p') || sessionStorage.getItem('redirectPath');
+      if (!hasRedirectParam) {
+        // Normal page load - initialize GA immediately
+        // React Router's PageViewTracker will handle route changes
+        gtag('config', 'G-K2BKTVN3CS');
+      }
+      // If redirect param exists, GA will be initialized after URL fix (see redirect handler below)
+      // This prevents tracking the intermediate redirect URL (/index.html?p=/tools)
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -93,6 +102,39 @@
   <script type="module" crossorigin src="/assets/index-Dke3W73u.js"></script>
 </head>
   <body class="bg-slate-50 text-slate-900 antialiased selection:bg-brand-blue selection:text-white">
+    <!-- GitHub Pages SPA redirect handler -->
+    <script>
+      // Handle redirect from 404.html - fixes URL before React Router loads
+      (function() {
+        var redirectPath = sessionStorage.getItem('redirectPath');
+        var needsRedirect = false;
+        var finalPath = '';
+        
+        if (redirectPath) {
+          sessionStorage.removeItem('redirectPath');
+          finalPath = redirectPath;
+          needsRedirect = true;
+        } else {
+          // Also check URL parameter (fallback)
+          var urlParams = new URLSearchParams(window.location.search);
+          var pathParam = urlParams.get('p');
+          if (pathParam) {
+            var newPath = '/' + decodeURIComponent(pathParam);
+            var newSearch = window.location.search.replace(/[?&]p=[^&]*/, '').replace(/^&/, '?');
+            finalPath = newPath + (newSearch === '?' ? '' : newSearch) + window.location.hash;
+            needsRedirect = true;
+          }
+        }
+        
+        if (needsRedirect) {
+          // Fix URL before React Router loads
+          history.replaceState(null, '', finalPath);
+          
+          // Don't initialize GA here - let React Router's PageViewTracker handle it
+          // This prevents double-counting page views
+        }
+      })();
+    </script>
     <div id="root"></div>
 </body>
 </html>
