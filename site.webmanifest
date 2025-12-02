@@ -1,0 +1,22 @@
+{
+  "name": "Wealthy4ever - Making Money Work For You",
+  "short_name": "Wealthy4ever",
+  "description": "Professional financial planning and investment tools to help you achieve your financial goals.",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#0047AB",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
+
