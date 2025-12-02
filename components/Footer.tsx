@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Mail, Phone, Linkedin, MessageCircle } from 'lucide-react';
 
 // Instagram SVG Icon component
@@ -14,6 +15,7 @@ const Footer: React.FC = () => {
   const whatsappLink = "https://wa.me/919819169655";
   const instagramLink = "https://www.instagram.com/wealthy4ever.in?igsh=YXp4c3p6OGU3Mmly&utm_source=qr";
   const linkedinLink = "https://www.linkedin.com/company/wealthy4ever";
+  const location = useLocation();
 
   // Scroll to top when navigating to tools
   const handleToolClick = () => {
@@ -57,15 +59,15 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-6">Tools</h3>
             <ul className="space-y-4">
-              <li><a href="#/tools?tool=risk-profile" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Risk Profiler</a></li>
-              <li><a href="#/tools?tool=insurance" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Life Insurance (HLV)</a></li>
-              <li><a href="#/tools?tool=sip" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">SIP Calculator</a></li>
-              <li><a href="#/tools?tool=lumpsum" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Lumpsum Growth</a></li>
-              <li><a href="#/tools?tool=retirement-accum" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Retirement Planner</a></li>
-              <li><a href="#/tools?tool=swp" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">SWP Calculator</a></li>
-              <li><a href="#/tools?tool=emi" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">EMI Calculator</a></li>
-              <li><a href="#/tools?tool=home-afford" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Home Affordability</a></li>
-              <li><a href="#/tools?tool=tax" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Salary & Tax</a></li>
+              <li><Link to="/tools?tool=risk-profile" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Risk Profiler</Link></li>
+              <li><Link to="/tools?tool=insurance" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Life Insurance (HLV)</Link></li>
+              <li><Link to="/tools?tool=sip" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">SIP Calculator</Link></li>
+              <li><Link to="/tools?tool=lumpsum" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Lumpsum Growth</Link></li>
+              <li><Link to="/tools?tool=retirement-accum" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Retirement Planner</Link></li>
+              <li><Link to="/tools?tool=swp" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">SWP Calculator</Link></li>
+              <li><Link to="/tools?tool=emi" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">EMI Calculator</Link></li>
+              <li><Link to="/tools?tool=home-afford" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Home Affordability</Link></li>
+              <li><Link to="/tools?tool=tax" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Salary & Tax</Link></li>
             </ul>
           </div>
 

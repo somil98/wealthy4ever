@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line
 } from 'recharts';
@@ -54,9 +55,11 @@ const calculatePV = (fv: number, rate: number, years: number) => fv / Math.pow(1
 
 // --- URL Params Helper ---
 const useUrlParams = (toolId: string, params: Record<string, any>, setters: Record<string, (v: any) => void>) => {
-  // Load from URL on mount
+  const location = useLocation();
+  
+  // Load from URL on mount and when location changes
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const searchParams = new URLSearchParams(location.search);
     const urlTool = searchParams.get('tool');
     
     if (urlTool === toolId) {
@@ -74,10 +77,11 @@ const useUrlParams = (toolId: string, params: Record<string, any>, setters: Reco
         }
       });
     }
-  }, [toolId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, toolId]);
 
   const generateShareUrl = useCallback(() => {
-    const baseUrl = window.location.href.split('?')[0];
+    const baseUrl = window.location.origin + window.location.pathname;
     const searchParams = new URLSearchParams();
     searchParams.set('tool', toolId);
     Object.entries(params).forEach(([key, value]) => {
@@ -134,27 +138,16 @@ const Calculator: React.FC = () => {
   const [activeTool, setActiveTool] = useState<CalculatorTab>('sip');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const location = useLocation();
 
-  // Load tool from URL on mount and on hash change
+  // Load tool from URL when location changes
   useEffect(() => {
-    const handleHashChange = () => {
-      const searchParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-      const urlTool = searchParams.get('tool') as CalculatorTab;
-      if (urlTool && TOOLS.some(t => t.id === urlTool)) {
-        setActiveTool(urlTool);
-      }
-    };
-
-    // Run on mount
-    handleHashChange();
-
-    // Listen for hash changes (when user clicks footer links while already on calculator page)
-    window.addEventListener('hashchange', handleHashChange);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, []);
+    const searchParams = new URLSearchParams(location.search);
+    const urlTool = searchParams.get('tool') as CalculatorTab;
+    if (urlTool && TOOLS.some(t => t.id === urlTool)) {
+      setActiveTool(urlTool);
+    }
+  }, [location]);
 
   // Scroll to top on tool change
   useEffect(() => {
