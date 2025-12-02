@@ -1,9 +1,30 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Shield, PieChart, TrendingUp, CheckCircle2, Handshake, Quote, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ArrowRight, BarChart3, Shield, PieChart, TrendingUp, CheckCircle2, Handshake, Quote, ChevronLeft, ChevronRight, Star, Target, RefreshCcw, Wallet, FileText } from 'lucide-react';
 
 // Testimonials Data
 const TESTIMONIALS = [
+  {
+    name: "Aldrin Kanchan",
+    role: "Canada based Marketing Head",
+    text: <>I am currently working in Canada and wanted to invest into Indian markets. They have answered my calls even at <strong>2am IST</strong> just to answer my questions. They are <strong>always there to help</strong> you in any situation without any excuse. It just took me <strong>3 days to start implementing</strong> their financial advice.</>,
+    avatar: "AK",
+    image: "/photos/aldrin_kanchan.webp",
+  },
+  {
+    name: "Malav Shah",
+    role: "Lawyer",
+    text: <>WEALTHY4EVER always looks for the best way to <strong>maximize the return</strong> on my investment at <strong>minimum risk</strong>. They are <strong>knowledgeable and trustworthy</strong> financial planners. Having worked with them over the last <strong>8 years</strong>, I am very confident about my finances today. They have taken care of my investments <strong>as their own</strong>.</>,
+    avatar: "MS",
+    image: "/photos/malav_shah.webp",
+  },
+  {
+    name: "Hetvi Doshi",
+    role: "Actuaries Professional",
+    text: <>I was in a mess and had no knowledge of Financial Planning. Now I am <strong>on track</strong> and can see some money at my disposal even for emergencies. One major thing I learned is that you <strong>save so much time</strong> that you otherwise would have spent worrying. I am <strong>hopeful and confident</strong> for a brighter future.</>,
+    avatar: "HD",
+    image: "/photos/hetvi_doshi.webp",
+  },
   {
     name: "Clarice D'Cunha",
     role: "Retired",
@@ -11,16 +32,10 @@ const TESTIMONIALS = [
     avatar: "CD",
   },
   {
-    name: "Malav Shah",
-    role: "Lawyer",
-    text: <>WEALTHY4EVER always looks for the best way to <strong>maximize the return</strong> on my investment at <strong>minimum risk</strong>. They are <strong>knowledgeable and trustworthy</strong> financial planners. Having worked with them over the last <strong>8 years</strong>, I am very confident about my finances today. They have taken care of my investments <strong>as their own</strong>.</>,
-    avatar: "MS",
-  },
-  {
-    name: "Maitri Shah",
-    role: "CA Professional",
-    text: <>I always thought Financial Planners essentially sell you insurance plans. My first meeting with them <strong>changed my perspective</strong>. The idea of financial planning made a lot of sense. It was simple – <strong>you invest based on your goals</strong>. I rate them very high and <strong>strongly recommend them</strong>!</>,
-    avatar: "MS",
+    name: "Nishi Savla",
+    role: "Work Psychologist",
+    text: <>As a psychologist, I understand the importance of <strong>mental peace</strong> in all aspects of life. WEALTHY4EVER has given me complete <strong>financial peace of mind</strong>. Their systematic approach to planning and their <strong>genuine care</strong> for clients makes them stand out. I <strong>highly recommend</strong> their services!</>,
+    avatar: "NS",
   },
   {
     name: "Somil Shah",
@@ -33,36 +48,28 @@ const TESTIMONIALS = [
     role: "Human Resource Manager",
     text: <>I was reluctant to engage in fee based financial planning. But eventually, I realized that there is a lot of unwanted information around. WEALTHY4EVER professionals are <strong>very patient</strong>. Their help in <strong>goal setting</strong>, mapping investing surplus to different goals, has made my financial life <strong>clear and growth oriented</strong>.</>,
     avatar: "KS",
+    image: "/photos/kishor_solanki.webp",
   },
   {
     name: "Parinda Vedsen",
     role: "Interior Designer",
     text: <>I always thought that managing finance was my husband's lookout. But after attending W4E's <strong>Women's Special Seminar</strong>, my perspective <strong>completely changed</strong>. They <strong>simplified everything</strong> for me. Just like I design interior designs for homes, WEALTHY4EVER <strong>designs and executes financial plans</strong>.</>,
     avatar: "PV",
+    image: "/photos/parinda_vedsen.webp",
   },
   {
     name: "Parin Sheth",
     role: "Debt-market Analyst",
     text: <>My profession demands me to look at the markets all day long. But now, having a <strong>professional handling all of that is a relief</strong>! Now I am <strong>stress-free</strong> and can focus more on my work. I am able to give more time to the <strong>people who are important</strong> to me.</>,
     avatar: "PS",
-  },
-  {
-    name: "Aldrin Kanchan",
-    role: "Canada based Marketing Head",
-    text: <>I am currently working in Canada and wanted to invest into Indian markets. They have answered my calls even at <strong>2am IST</strong> just to answer my questions. They are <strong>always there to help</strong> you in any situation without any excuse. It just took me <strong>3 days to start implementing</strong> their financial advice.</>,
-    avatar: "AK",
+    image: "/photos/parin_sheth.webp",
   },
   {
     name: "Sharal D'Souza",
     role: "Staff Nurse, London",
     text: <>People have family doctors who know their health inside out. In the same way, WEALTHY4EVER is my <strong>family doctor for finances</strong>. Based on my risk profile, they suggest <strong>solutions personalized for me</strong>. I am very <strong>confident about my financial health</strong> because of them.</>,
     avatar: "SD",
-  },
-  {
-    name: "Hetvi Doshi",
-    role: "Actuaries Professional",
-    text: <>I was in a mess and had no knowledge of Financial Planning. Now I am <strong>on track</strong> and can see some money at my disposal even for emergencies. One major thing I learned is that you <strong>save so much time</strong> that you otherwise would have spent worrying. I am <strong>hopeful and confident</strong> for a brighter future.</>,
-    avatar: "HD",
+    image: "/photos/sharal_dsouza.webp",
   },
   {
     name: "N P Polyprints",
@@ -75,6 +82,7 @@ const TESTIMONIALS = [
     role: "Counselor & Teacher",
     text: <>I used to invest money on my own without mapping them to my goals. They showed me <strong>exactly how much I needed to invest</strong> and made a small <strong>one-page Financial Plan</strong>. They also provided me with an app where I can view <strong>all my investments and insurance</strong> in a single click.</>,
     avatar: "ND",
+    image: "/photos/nishit_doshi.webp",
   },
 ];
 
@@ -147,9 +155,17 @@ const TestimonialsSection: React.FC = () => {
 
                 {/* Author */}
                 <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                    {testimonial.avatar}
-                  </div>
+                  {testimonial.image ? (
+                    <img 
+                      src={testimonial.image} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                      {testimonial.avatar}
+                    </div>
+                  )}
                   <div>
                     <h4 className="font-bold text-slate-900">{testimonial.name}</h4>
                     <p className="text-sm text-slate-500">{testimonial.role}</p>
@@ -187,9 +203,17 @@ const TestimonialsSection: React.FC = () => {
               ))}
             </div>
             <div className="flex items-center gap-3 pt-4 border-t border-slate-200">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-bold">
-                {TESTIMONIALS[currentIndex].avatar}
-              </div>
+              {TESTIMONIALS[currentIndex].image ? (
+                <img 
+                  src={TESTIMONIALS[currentIndex].image} 
+                  alt={TESTIMONIALS[currentIndex].name}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-bold">
+                  {TESTIMONIALS[currentIndex].avatar}
+                </div>
+              )}
               <div>
                 <h4 className="font-bold text-slate-900">{TESTIMONIALS[currentIndex].name}</h4>
                 <p className="text-sm text-slate-500">{TESTIMONIALS[currentIndex].role}</p>
@@ -286,40 +310,48 @@ const Home: React.FC = () => {
             </div>
           </div>
           
-          {/* Hero Visual */}
-          <div className="relative z-10 hidden lg:block">
-            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-2xl">
-              <div className="flex justify-between items-center mb-8">
-                 <div>
-                    <p className="text-blue-100 text-sm">Portfolio Growth</p>
-                    <h3 className="text-white text-2xl font-bold">+18.4% <span className="text-sm font-normal text-green-300">▲ YTD</span></h3>
-                 </div>
-                 <div className="bg-brandRed p-3 rounded-lg text-white">
-                    <TrendingUp size={24} />
-                 </div>
-              </div>
-              {/* Mock Chart Visualization */}
-              <div className="h-48 flex items-end justify-between gap-2">
-                 {[40, 65, 55, 80, 70, 90, 100].map((h, i) => (
-                    <div key={i} className="w-full bg-blue-400/30 rounded-t-sm hover:bg-blue-400/50 transition-colors relative group">
-                        <div style={{height: `${h}%`}} className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-md"></div>
-                    </div>
-                 ))}
-              </div>
-              <div className="mt-6 flex justify-between text-white/60 text-xs">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span>
-              </div>
+          {/* Hero Visual - Scattered Testimonial Bubbles */}
+          <div className="relative z-10 hidden lg:block h-[420px] w-full">
+            {/* Testimonial Bubbles */}
+            
+            {/* Large bubble - top right */}
+            <div className="absolute top-0 right-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-4 shadow-xl animate-float" style={{ animationDelay: '0s' }}>
+              <Quote size={14} className="text-white/40 mb-1" />
+              <p className="text-white font-medium leading-snug max-w-[180px]">"family doctor for finances"</p>
             </div>
             
-            {/* Floating Element */}
-            <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl flex items-center gap-4 animate-bounce-slow">
-               <div className="bg-green-100 p-2 rounded-full text-green-600">
-                  <CheckCircle2 size={24} />
-               </div>
-               <div>
-                  <p className="text-slate-500 text-xs">Goal Reached</p>
-                  <p className="text-slate-900 font-bold">₹ 1.5 Cr Saved</p>
-               </div>
+            {/* Medium bubble - top left */}
+            <div className="absolute top-8 left-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 shadow-xl animate-float" style={{ animationDelay: '0.7s' }}>
+              <Quote size={14} className="text-white/40 mb-1" />
+              <p className="text-white font-medium leading-snug max-w-[160px]">"simplified everything"</p>
+            </div>
+            
+            {/* Small accent bubble - red background */}
+            <div className="absolute top-28 right-24 bg-brandRed/90 backdrop-blur-md border border-red-400/30 rounded-xl px-4 py-2 shadow-xl animate-float" style={{ animationDelay: '1.2s' }}>
+              <p className="text-white font-bold text-sm">"stress-free"</p>
+            </div>
+            
+            {/* Medium bubble - mid left */}
+            <div className="absolute top-40 left-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 shadow-xl animate-float" style={{ animationDelay: '1.8s' }}>
+              <Quote size={14} className="text-white/40 mb-1" />
+              <p className="text-white font-medium leading-snug max-w-[180px]">"answered calls at 2am"</p>
+            </div>
+            
+            {/* Large bubble - center right */}
+            <div className="absolute top-44 right-0 bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-5 py-4 shadow-xl animate-float" style={{ animationDelay: '0.4s' }}>
+              <Quote size={14} className="text-white/40 mb-1" />
+              <p className="text-white font-medium leading-snug max-w-[200px]">"confident about my financial health"</p>
+            </div>
+            
+            {/* Small bubble - bottom left */}
+            <div className="absolute bottom-16 left-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-2 shadow-xl animate-float" style={{ animationDelay: '2.2s' }}>
+              <p className="text-white/90 font-medium text-sm">"super organized"</p>
+            </div>
+            
+            {/* Medium bubble - bottom center */}
+            <div className="absolute bottom-4 left-1/3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 shadow-xl animate-float" style={{ animationDelay: '1s' }}>
+              <Quote size={14} className="text-white/40 mb-1" />
+              <p className="text-white font-medium leading-snug max-w-[160px]">"changed my perspective"</p>
             </div>
           </div>
         </div>
@@ -361,42 +393,77 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1 - Financial Advisory */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Card 1 - Asset Allocation */}
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
             <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
-              <PieChart size={28} />
+              <Wallet size={28} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">Financial Advisory</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Asset Allocation</h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              Comprehensive financial planning, wealth creation strategies, goal-based investing, and strategic asset allocation tailored to your needs.
+              Strategic distribution of your investments across asset classes to optimize returns while managing risk according to your profile.
             </p>
-            <Link to="/about" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></Link>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Asset%20Allocation" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></a>
           </div>
 
-          {/* Card 2 - Insurance Solutions */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-brandRed text-white text-xs font-bold px-3 py-1 rounded-bl-lg">99.8% CLAIMS</div>
+          {/* Card 2 - Financial Planning */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
+            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
+              <FileText size={28} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Financial Planning</h3>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Comprehensive financial roadmaps tailored to your life goals, from retirement planning to education funding and beyond.
+            </p>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Financial%20Planning" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></a>
+          </div>
+
+          {/* Card 3 - Goal-Based Investing */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
+            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
+              <Target size={28} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Goal-Based Investing</h3>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Align your investments with specific life goals, ensuring every rupee works towards achieving your dreams systematically.
+            </p>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Goal-Based%20Investing" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></a>
+          </div>
+
+          {/* Card 4 - Wealth Creation */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
+            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
+              <TrendingUp size={28} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Wealth Creation</h3>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Build long-term wealth through smart investment strategies, compounding power, and disciplined portfolio management.
+            </p>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Wealth%20Creation" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></a>
+          </div>
+
+          {/* Card 5 - Portfolio Review */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
+            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
+              <RefreshCcw size={28} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Portfolio Review</h3>
+            <p className="text-slate-600 mb-6 leading-relaxed">
+              Regular assessment and rebalancing of your investment portfolio to ensure it stays aligned with your goals and market conditions.
+            </p>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Portfolio%20Review" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></a>
+          </div>
+
+          {/* Card 6 - Wealth Protection */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
             <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
               <Shield size={28} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">Insurance Solutions</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-3">Wealth Protection</h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              Life, health, personal accident, critical illness, fire, marine, and corporate insurance with 100% life insurance claim settlement.
+              Safeguard your assets and family's future with comprehensive insurance solutions and risk management strategies.
             </p>
-            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20about%20insurance%20solutions" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Get Protected <ArrowRight size={16}/></a>
-          </div>
-
-          {/* Card 3 - Investment Products */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-slate-100 group">
-            <div className="h-14 w-14 bg-blue-50 rounded-xl flex items-center justify-center text-brand-blue mb-6 group-hover:bg-brand-blue group-hover:text-white transition-colors">
-              <BarChart3 size={28} />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">Investment Products</h3>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              Mutual Funds, Portfolio Management Services (PMS), Fixed Deposits, and our exclusive MARS (Mutual Funds Automated Reallocation System).
-            </p>
-            <Link to="/tools" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Calculate Returns <ArrowRight size={16}/></Link>
+            <a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Wealth%20Protection" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-semibold flex items-center gap-1 hover:underline">Learn More <ArrowRight size={16}/></a>
           </div>
         </div>
       </div>
@@ -410,7 +477,7 @@ const Home: React.FC = () => {
               <span className="text-sm font-bold tracking-wider uppercase">Our Partners</span>
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
-              Trusted Partnerships with India's Leading Insurers
+              Trusted Partnerships with India's Leading Companies
             </h2>
           </div>
           
@@ -435,12 +502,27 @@ const Home: React.FC = () => {
                 General Insurance Partners
               </h3>
               <div className="flex flex-wrap gap-3">
-                {['New India Assurance', 'Bajaj Allianz', 'HDFC ERGO', 'Star Health', 'TATA AIG'].map((partner) => (
+                {['New India Assurance', 'Bajaj Allianz', 'HDFC ERGO', 'Niva Bupa', 'TATA AIG'].map((partner) => (
                   <span key={partner} className="px-4 py-2 bg-red-50 text-brandRed rounded-full text-sm font-medium">
                     {partner}
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+          
+          {/* Partnered AMCs */}
+          <div className="mt-8 bg-white rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="h-2 w-2 bg-green-600 rounded-full"></span>
+              Partnered AMCs
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {['AXIS Mutual Fund', 'BAJAJ Mutual Fund', 'HDFC Mutual Fund', 'KOTAK Mutual Fund', 'SBI Mutual Fund'].map((partner) => (
+                <span key={partner} className="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium">
+                  {partner}
+                </span>
+              ))}
             </div>
           </div>
         </div>

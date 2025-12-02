@@ -135,13 +135,25 @@ const Calculator: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Load tool from URL on mount
+  // Load tool from URL on mount and on hash change
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    const urlTool = searchParams.get('tool') as CalculatorTab;
-    if (urlTool && TOOLS.some(t => t.id === urlTool)) {
-      setActiveTool(urlTool);
-    }
+    const handleHashChange = () => {
+      const searchParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+      const urlTool = searchParams.get('tool') as CalculatorTab;
+      if (urlTool && TOOLS.some(t => t.id === urlTool)) {
+        setActiveTool(urlTool);
+      }
+    };
+
+    // Run on mount
+    handleHashChange();
+
+    // Listen for hash changes (when user clicks footer links while already on calculator page)
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   // Scroll to top on tool change
@@ -694,15 +706,22 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const [rate, setRate] = useState(12);
   const [years, setYears] = useState(10);
   const [stepUp, setStepUp] = useState(0);
-  const [postSipYears, setPostSipYears] = useState(0); // NEW: Post-SIP investment horizon
+  const [stepUpMode, setStepUpMode] = useState<'percent' | 'amount'>('percent'); // NEW: Step-up mode
+  const [stepUpAmount, setStepUpAmount] = useState(1000); // NEW: Step-up by fixed amount
+  const [postSipYears, setPostSipYears] = useState(0); // Post-SIP investment horizon
+  const [initialInvestment, setInitialInvestment] = useState(0); // NEW: Initial investment
 
-  const params = { monthly, rate, years, stepUp, postSipYears };
-  const setters = { monthly: setMonthly, rate: setRate, years: setYears, stepUp: setStepUp, postSipYears: setPostSipYears };
+  const params = { monthly, rate, years, stepUp, stepUpMode, stepUpAmount, postSipYears, initialInvestment };
+  const setters = { 
+    monthly: setMonthly, rate: setRate, years: setYears, stepUp: setStepUp, 
+    stepUpMode: setStepUpMode as any, stepUpAmount: setStepUpAmount, postSipYears: setPostSipYears,
+    initialInvestment: setInitialInvestment
+  };
   const { generateShareUrl } = useUrlParams('sip', params, setters);
 
   const result = useMemo(() => {
-    let invested = 0;
-    let value = 0;
+    let invested = initialInvestment;
+    let value = initialInvestment;
     const monthlyRate = rate / 12 / 100;
     let currentSip = monthly;
     const data: any[] = [];
@@ -720,9 +739,17 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         year: y, 
         invested: Math.round(invested), 
         value: Math.round(value),
-        phase: 'Contribution'
+        phase: 'Contribution',
+        sipAmount: Math.round(currentSip)
       });
-      if (showAdvanced) currentSip *= (1 + stepUp / 100);
+      // Apply step-up based on mode
+      if (showAdvanced) {
+        if (stepUpMode === 'percent' && stepUp > 0) {
+          currentSip *= (1 + stepUp / 100);
+        } else if (stepUpMode === 'amount' && stepUpAmount > 0) {
+          currentSip += stepUpAmount;
+        }
+      }
     }
 
     const corpusAtEndOfSIP = value;
@@ -737,17 +764,30 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
           year: years + y, 
           invested: Math.round(invested), 
           value: Math.round(value),
-          phase: 'Growth Only'
+          phase: 'Growth Only',
+          sipAmount: 0
         });
       }
     }
 
-    return { invested, corpusAtEndOfSIP, finalCorpus: value, data, hasPostSip: postSipYears > 0 && showAdvanced };
-  }, [monthly, rate, years, stepUp, postSipYears, showAdvanced]);
+    // Calculate final SIP amount for display
+    let finalSip = monthly;
+    for (let y = 1; y < years; y++) {
+      if (stepUpMode === 'percent' && stepUp > 0) {
+        finalSip *= (1 + stepUp / 100);
+      } else if (stepUpMode === 'amount' && stepUpAmount > 0) {
+        finalSip += stepUpAmount;
+      }
+    }
+
+    return { invested, corpusAtEndOfSIP, finalCorpus: value, data, hasPostSip: postSipYears > 0 && showAdvanced, finalSip: Math.round(finalSip) };
+  }, [monthly, rate, years, stepUp, stepUpMode, stepUpAmount, postSipYears, initialInvestment, showAdvanced]);
 
   const handleShare = () => {
     navigator.clipboard.writeText(generateShareUrl());
   };
+
+  const hasStepUp = showAdvanced && ((stepUpMode === 'percent' && stepUp > 0) || (stepUpMode === 'amount' && stepUpAmount > 0));
 
   return (
     <div className="grid lg:grid-cols-12 gap-8">
@@ -761,8 +801,50 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         
         {showAdvanced && (
           <div className="pt-4 border-t border-slate-100 animate-fade-in space-y-6">
-            <InputSlider label="Annual Step-up" value={stepUp} setValue={setStepUp} min={0} max={20} unit="%" />
-            <p className="text-xs text-slate-400 -mt-4">Increase your SIP amount by {stepUp}% every year.</p>
+            {/* Initial Investment */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-100">
+              <InputCurrency label="Initial Investment" value={initialInvestment} setValue={setInitialInvestment} min={0} max={10000000} step={10000} />
+              <p className="text-xs text-purple-600 mt-2">
+                Start your SIP with a one-time lump sum investment.
+              </p>
+            </div>
+
+            {/* Step-up Mode Toggle */}
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-3">Step-up SIP Type</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setStepUpMode('percent')}
+                  className={`py-3 px-4 rounded-lg text-sm font-bold transition-all border-2
+                    ${stepUpMode === 'percent' 
+                      ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                      : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                >
+                  By Percentage (%)
+                </button>
+                <button
+                  onClick={() => setStepUpMode('amount')}
+                  className={`py-3 px-4 rounded-lg text-sm font-bold transition-all border-2
+                    ${stepUpMode === 'amount' 
+                      ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                      : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                >
+                  By Amount (₹)
+                </button>
+              </div>
+            </div>
+
+            {stepUpMode === 'percent' ? (
+              <>
+                <InputSlider label="Annual Step-up" value={stepUp} setValue={setStepUp} min={0} max={20} unit="%" />
+                <p className="text-xs text-slate-400 -mt-4">Increase your SIP amount by {stepUp}% every year.</p>
+              </>
+            ) : (
+              <>
+                <InputCurrency label="Annual Step-up Amount" value={stepUpAmount} setValue={setStepUpAmount} min={0} max={50000} step={500} />
+                <p className="text-xs text-slate-400 -mt-4">Increase your SIP by ₹{stepUpAmount.toLocaleString('en-IN')} every year.</p>
+              </>
+            )}
             
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
               <InputSlider label="Post-SIP Horizon" value={postSipYears} setValue={setPostSipYears} min={0} max={30} unit="Yrs" />
@@ -781,6 +863,31 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
           value={result.finalCorpus} 
           subtitle={`Total Invested: ${formatShort(result.invested)} | Gain: ${formatShort(result.finalCorpus - result.invested)}`} 
         />
+
+        {/* Initial Investment Display */}
+        {showAdvanced && initialInvestment > 0 && (
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-100">
+            <div className="text-xs text-purple-600 uppercase font-bold mb-1">Initial Investment</div>
+            <div className="text-lg font-bold text-purple-700">{formatShort(initialInvestment)}</div>
+            <p className="text-xs text-purple-600 mt-1">
+              This amount grows to {formatShort(calculateFV(initialInvestment, rate, years))} over {years} years.
+            </p>
+          </div>
+        )}
+
+        {/* Step-up SIP Info */}
+        {hasStepUp && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 text-center">
+              <div className="text-xs text-slate-500 uppercase font-bold mb-1">Starting SIP</div>
+              <div className="text-lg font-bold text-slate-800">{formatShort(monthly)}/mo</div>
+            </div>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100 text-center">
+              <div className="text-xs text-green-600 uppercase font-bold mb-1">Final SIP (Year {years})</div>
+              <div className="text-lg font-bold text-green-700">{formatShort(result.finalSip)}/mo</div>
+            </div>
+          </div>
+        )}
 
         {/* Secondary Result - Only show if post-SIP is enabled */}
         {result.hasPostSip && (
@@ -1024,12 +1131,16 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
   const [enableStepUp, setEnableStepUp] = useState(false);
   const [sipStepUp, setSipStepUp] = useState(10);
   const [stepUpDuration, setStepUpDuration] = useState(0); // 0 = entire SIP duration
+  
+  // NEW: Current Savings
+  const [currentSavings, setCurrentSavings] = useState(0);
 
-  const params = { age, retireAge, expenses, inflation, preRate, postRate, lifeExp, enableStepUp, sipStepUp, stepUpDuration };
+  const params = { age, retireAge, expenses, inflation, preRate, postRate, lifeExp, enableStepUp, sipStepUp, stepUpDuration, currentSavings };
   const setters = { 
     age: setAge, retireAge: setRetireAge, expenses: setExpenses, inflation: setInflation, 
     preRate: setPreRate, postRate: setPostRate, lifeExp: setLifeExp, 
-    enableStepUp: setEnableStepUp, sipStepUp: setSipStepUp, stepUpDuration: setStepUpDuration 
+    enableStepUp: setEnableStepUp, sipStepUp: setSipStepUp, stepUpDuration: setStepUpDuration,
+    currentSavings: setCurrentSavings
   };
   const { generateShareUrl } = useUrlParams('retirement-accum', params, setters);
 
@@ -1047,10 +1158,14 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
     if (Math.abs(realRate) < 0.001) corpus = annualExpense * yearsInRetire;
     else corpus = annualExpense * ((1 - Math.pow(1 + realRate, -yearsInRetire)) / realRate);
 
+    // Adjust corpus for current savings (future value of current savings)
+    const fvCurrentSavings = currentSavings > 0 ? calculateFV(currentSavings, preRate, yearsToRetire) : 0;
+    const adjustedCorpus = Math.max(0, corpus - fvCurrentSavings);
+
     // Without Step-Up: Standard SIP Required
     const monthlyRate = preRate/12/100;
     const months = yearsToRetire * 12;
-    const standardSip = corpus * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1);
+    const standardSip = adjustedCorpus > 0 ? adjustedCorpus * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1) : 0;
 
     // With Step-Up: Month-by-month calculation
     let stepUpSip = standardSip;
@@ -1065,7 +1180,7 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
       
       while (high - low > 100) {
         const mid = (low + high) / 2;
-        let testCorpus = 0;
+        let testCorpus = currentSavings; // Start with current savings
         let currentSip = mid;
         const effectiveStepUpYears = stepUpDuration > 0 ? Math.min(stepUpDuration, yearsToRetire) : yearsToRetire;
         
@@ -1092,6 +1207,9 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
       let currentSip = stepUpSip;
       const effectiveStepUpYears = stepUpDuration > 0 ? Math.min(stepUpDuration, yearsToRetire) : yearsToRetire;
       
+      // Start with current savings and let it grow month by month
+      corpusWithStepUp = currentSavings;
+      
       for (let y = 1; y <= yearsToRetire; y++) {
         totalInvestedWithStepUp += currentSip * 12;
         for (let m = 1; m <= 12; m++) {
@@ -1105,6 +1223,13 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
     }
 
     const totalInvestedStandard = standardSip * months;
+    
+    // Calculate final corpus without step-up (including current savings)
+    let finalCorpusStandard = currentSavings;
+    for (let m = 1; m <= months; m++) {
+      finalCorpusStandard += standardSip;
+      finalCorpusStandard *= (1 + monthlyRate);
+    }
 
     return { 
       corpus, 
@@ -1113,10 +1238,11 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
       fvExpenseMonth,
       totalInvestedStandard,
       totalInvestedWithStepUp: showAdvanced && enableStepUp ? totalInvestedWithStepUp : totalInvestedStandard,
-      corpusWithStepUp: showAdvanced && enableStepUp ? corpusWithStepUp : corpus,
-      savings: totalInvestedStandard - (showAdvanced && enableStepUp ? totalInvestedWithStepUp : totalInvestedStandard)
+      corpusWithStepUp: showAdvanced && enableStepUp ? corpusWithStepUp : finalCorpusStandard,
+      savings: totalInvestedStandard - (showAdvanced && enableStepUp ? totalInvestedWithStepUp : totalInvestedStandard),
+      fvCurrentSavings: currentSavings > 0 ? calculateFV(currentSavings, preRate, yearsToRetire) : 0
     };
-  }, [age, retireAge, expenses, inflation, preRate, postRate, lifeExp, enableStepUp, sipStepUp, stepUpDuration, showAdvanced]);
+  }, [age, retireAge, expenses, inflation, preRate, postRate, lifeExp, enableStepUp, sipStepUp, stepUpDuration, currentSavings, showAdvanced]);
 
   const handleShare = () => {
     navigator.clipboard.writeText(generateShareUrl());
@@ -1144,6 +1270,16 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
             <div className="pt-4 border-t border-slate-100 animate-fade-in grid grid-cols-2 gap-4">
               <InputSlider label="Life Expectancy" value={lifeExp} setValue={setLifeExp} min={70} max={100} unit="Yrs" />
               <InputSlider label="Post-Retire Return" value={postRate} setValue={setPostRate} min={5} max={10} unit="%" />
+            </div>
+
+            {/* NEW: Current Savings Section */}
+            <div className="pt-4 border-t border-slate-100 animate-fade-in">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+                <InputCurrency label="Current Savings" value={currentSavings} setValue={setCurrentSavings} min={0} max={50000000} step={100000} />
+                <p className="text-xs text-green-600 mt-2">
+                  Add any existing savings that will grow towards your retirement corpus.
+                </p>
+              </div>
             </div>
 
             {/* NEW: Step-Up SIP Section */}
@@ -1218,6 +1354,15 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
           </div>
         )}
 
+        {result.fvCurrentSavings > 0 && (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+            <h4 className="text-sm font-bold text-green-700 mb-2">Current Savings Impact</h4>
+            <p className="text-sm text-green-800">
+              Your current savings of <strong>{formatShort(currentSavings)}</strong> will grow to <strong>{formatShort(result.fvCurrentSavings)}</strong> by retirement, reducing your required SIP.
+            </p>
+          </div>
+        )}
+
         <div className="bg-white p-4 rounded-xl border border-slate-200">
           <h4 className="text-sm font-bold text-slate-800 mb-2">Inflation Impact</h4>
           <p className="text-sm text-slate-600">
@@ -1260,7 +1405,12 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
 
       if (m % 12 === 0) {
         years++;
-        data.push({ year: years, balance: Math.max(0, Math.round(balance)), withdrawal: Math.round(currentWithdrawal) });
+        data.push({ 
+          year: years, 
+          balance: Math.max(0, Math.round(balance)), 
+          withdrawal: Math.round(currentWithdrawal),
+          monthlyIncome: Math.round(currentWithdrawal)
+        });
         if (showAdvanced) currentWithdrawal *= (1 + stepUp/100);
       }
     }
@@ -1282,7 +1432,7 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         <InputCurrency label="Monthly Withdrawal" value={withdrawal} setValue={setWithdrawal} min={5000} max={500000} step={1000} />
         <InputSlider label="Expected Return (p.a)" value={rate} setValue={setRate} min={4} max={15} unit="%" />
         {showAdvanced && (
-          <div className="pt-4 animate-fade-in">
+          <div className="pt-4 animate-fade-in space-y-6">
             <InputSlider label="Annual Withdrawal Increase" value={stepUp} setValue={setStepUp} min={0} max={10} unit="%" />
           </div>
         )}
@@ -1296,17 +1446,44 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
           isCurrency={false}
           suffix="Years"
         />
+        
+        {/* Monthly Income Display */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 text-center">
+            <div className="text-xs text-slate-500 uppercase font-bold mb-1">Starting Monthly Income</div>
+            <div className="text-lg font-bold text-green-600">{formatShort(withdrawal)}</div>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-slate-200 text-center">
+            <div className="text-xs text-slate-500 uppercase font-bold mb-1">Total Withdrawals</div>
+            <div className="text-lg font-bold text-slate-800">{formatShort(result.totalWithdrawn)}</div>
+          </div>
+        </div>
+
         <div className="card-result p-4 h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={result.data}>
+            <ComposedChart data={result.data}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="year" />
-              <YAxis tickFormatter={(v) => `${(v/100000).toFixed(0)}L`} width={40} />
-              <Tooltip formatter={(v: number) => formatShort(v)} />
-              <Area type="monotone" dataKey="balance" stroke="#DC2626" fill="#fee2e2" name="Remaining Balance" />
-            </AreaChart>
+              <XAxis dataKey="year" tick={{fontSize: 10}} />
+              <YAxis yAxisId="left" tickFormatter={(v) => `${(v/100000).toFixed(0)}L`} width={45} tick={{fontSize: 10}} />
+              <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} width={45} tick={{fontSize: 10}} />
+              <Tooltip formatter={(v: number, name: string) => [formatShort(v), name]} />
+              <Legend />
+              <Area yAxisId="left" type="monotone" dataKey="balance" stroke="#DC2626" fill="#fee2e2" name="Remaining Balance" />
+              <Line yAxisId="right" type="stepAfter" dataKey="monthlyIncome" stroke="#10B981" strokeWidth={2} dot={false} name="Monthly Income" />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
+
+        {showAdvanced && stepUp > 0 && (
+          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-xl border border-amber-100 text-sm">
+            <div className="flex items-start gap-2">
+              <Info size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
+              <p className="text-amber-800">
+                <strong>Inflation-Adjusted Withdrawals:</strong> Your monthly income starts at {formatShort(withdrawal)} and increases by {stepUp}% annually to keep pace with inflation.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1657,7 +1834,7 @@ const InsuranceCalculator = () => {
         <div className="flex justify-end">
           <ShareButton onClick={handleShare} />
         </div>
-        <InputCurrency label="Annual Net Income" value={income} setValue={setIncome} min={500000} max={10000000} step={100000} />
+        <InputCurrency label="Annual Net Income" value={income} setValue={setIncome} min={500000} max={100000000} step={100000} />
         <InputSlider label="Current Age" value={age} setValue={setAge} min={20} max={55} unit="Yrs" />
         <InputCurrency label="Outstanding Loans" value={liabilities} setValue={setLiabilities} min={0} max={50000000} step={100000} />
         <div className="pt-4 border-t border-slate-100">

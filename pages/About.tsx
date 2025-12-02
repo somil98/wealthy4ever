@@ -108,7 +108,7 @@ const About: React.FC = () => {
           <div className="relative">
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
               <img 
-                src="/logo.png" 
+                src="/logo.webp" 
                 alt="Wealthy4ever Logo" 
                 className="w-full max-w-xs mx-auto"
               />
@@ -161,7 +161,7 @@ const About: React.FC = () => {
                 <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-brand-blue text-white mb-6">
                   <Users size={24} />
                 </div>
-                <p className="text-brandRed font-bold text-lg mb-2">2018</p>
+                <p className="text-brandRed font-bold text-lg mb-2">2017</p>
                 <h3 className="text-xl font-bold text-white mb-3">New Generation</h3>
                 <p className="text-slate-400">
                   Second generation joined, bringing <strong className="text-slate-300">fresh perspectives and digital-first strategies</strong> 
@@ -184,20 +184,24 @@ const About: React.FC = () => {
         
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center group hover:shadow-xl transition-shadow">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
-              DS
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-1">Dipika Nilesh Shah</h3>
-            <p className="text-brandRed font-medium mb-4">Head of Operations</p>
+            <img 
+              src="/photos/nikunj_shah.webp" 
+              alt="Nikunj Nilesh Shah"
+              className="h-20 w-20 rounded-full object-cover mx-auto mb-6"
+            />
+            <h3 className="text-xl font-bold text-slate-900 mb-1">Nikunj Nilesh Shah</h3>
+            <p className="text-brandRed font-medium mb-4">CFP, CWM & QPFP</p>
             <p className="text-slate-600 text-sm">
-              Managing the backend office and staff operations with precision and care.
+              Driving digital transformation and handling policy issuance with modern efficiency.
             </p>
           </div>
           
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center group hover:shadow-xl transition-shadow">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
-              NS
-            </div>
+            <img 
+              src="/photos/nilesh_shah.webp" 
+              alt="Nilesh Jayantilal Shah"
+              className="h-20 w-20 rounded-full object-cover mx-auto mb-6"
+            />
             <h3 className="text-xl font-bold text-slate-900 mb-1">Nilesh Jayantilal Shah</h3>
             <p className="text-brandRed font-medium mb-4">Head of Marketing & Claims</p>
             <p className="text-slate-600 text-sm">
@@ -206,13 +210,15 @@ const About: React.FC = () => {
           </div>
           
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 text-center group hover:shadow-xl transition-shadow">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
-              NK
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-1">Nikunj Nilesh Shah</h3>
-            <p className="text-brandRed font-medium mb-4">Marketing & Policy Issuance</p>
+            <img 
+              src="/photos/dipika_shah.webp" 
+              alt="Dipika Nilesh Shah"
+              className="h-20 w-20 rounded-full object-cover mx-auto mb-6"
+            />
+            <h3 className="text-xl font-bold text-slate-900 mb-1">Dipika Nilesh Shah</h3>
+            <p className="text-brandRed font-medium mb-4">Head of Operations</p>
             <p className="text-slate-600 text-sm">
-              Driving digital transformation and handling policy issuance with modern efficiency.
+              Managing the backend office and staff operations with precision and care.
             </p>
           </div>
         </div>
@@ -366,12 +372,27 @@ const About: React.FC = () => {
                 General Insurance Partners
               </h3>
               <div className="flex flex-wrap gap-3">
-                {['New India Assurance', 'Bajaj Allianz', 'HDFC ERGO', 'Star Health', 'TATA AIG'].map((partner) => (
+                {['New India Assurance', 'Bajaj Allianz', 'HDFC ERGO', 'Niva Bupa', 'TATA AIG'].map((partner) => (
                   <span key={partner} className="px-4 py-2 bg-red-50 text-brandRed rounded-full text-sm font-medium">
                     {partner}
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+          
+          {/* Partnered AMCs */}
+          <div className="mt-8 bg-white rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="h-2 w-2 bg-green-600 rounded-full"></span>
+              Partnered AMCs
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {['AXIS Mutual Fund', 'BAJAJ Mutual Fund', 'HDFC Mutual Fund', 'KOTAK Mutual Fund', 'SBI Mutual Fund'].map((partner) => (
+                <span key={partner} className="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium">
+                  {partner}
+                </span>
+              ))}
             </div>
           </div>
         </div>

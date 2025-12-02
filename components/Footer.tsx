@@ -1,7 +1,25 @@
 import React from 'react';
-import { Mail, Phone, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { Mail, Phone, Linkedin, MessageCircle } from 'lucide-react';
+
+// Instagram SVG Icon component
+const InstagramIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
 
 const Footer: React.FC = () => {
+  const whatsappLink = "https://wa.me/919819169655";
+  const instagramLink = "https://www.instagram.com/wealthy4ever.in?igsh=YXp4c3p6OGU3Mmly&utm_source=qr";
+  const linkedinLink = "https://www.linkedin.com/company/wealthy4ever";
+
+  // Scroll to top when navigating to tools
+  const handleToolClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer className="bg-slate-900 text-slate-300">
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
@@ -18,28 +36,36 @@ const Footer: React.FC = () => {
               Empowering families to build generational wealth through disciplined investment strategies and smart financial planning.
             </p>
             <div className="flex space-x-4">
-               <a href="#" className="text-slate-400 hover:text-white transition-colors"><Twitter size={20}/></a>
-               <a href="#" className="text-slate-400 hover:text-white transition-colors"><Linkedin size={20}/></a>
-               <a href="#" className="text-slate-400 hover:text-white transition-colors"><Facebook size={20}/></a>
+               <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors"><InstagramIcon size={20}/></a>
+               <a href={linkedinLink} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors"><Linkedin size={20}/></a>
+               <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors"><MessageCircle size={20}/></a>
             </div>
           </div>
           
           <div>
             <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-6">Services</h3>
             <ul className="space-y-4">
-              <li><a href="#" className="text-sm hover:text-brandRed transition-colors">Portfolio Management</a></li>
-              <li><a href="#" className="text-sm hover:text-brandRed transition-colors">Retirement Planning</a></li>
-              <li><a href="#" className="text-sm hover:text-brandRed transition-colors">Tax Consultancy</a></li>
-              <li><a href="#" className="text-sm hover:text-brandRed transition-colors">Estate Planning</a></li>
+              <li><a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Asset%20Allocation" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brandRed transition-colors">Asset Allocation</a></li>
+              <li><a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Financial%20Planning" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brandRed transition-colors">Financial Planning</a></li>
+              <li><a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Goal-Based%20Investing" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brandRed transition-colors">Goal-Based Investing</a></li>
+              <li><a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Wealth%20Creation" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brandRed transition-colors">Wealth Creation</a></li>
+              <li><a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Portfolio%20Review" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brandRed transition-colors">Portfolio Review</a></li>
+              <li><a href="https://wa.me/919819169655?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20Wealth%20Protection" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brandRed transition-colors">Wealth Protection</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-6">Tools</h3>
             <ul className="space-y-4">
-              <li><a href="#/tools" className="text-sm hover:text-brandRed transition-colors">SIP Calculator</a></li>
-              <li><a href="#/tools" className="text-sm hover:text-brandRed transition-colors">Retirement Projector</a></li>
-              <li><a href="#" className="text-sm hover:text-brandRed transition-colors">Goal Planner</a></li>
+              <li><a href="#/tools?tool=risk-profile" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Risk Profiler</a></li>
+              <li><a href="#/tools?tool=insurance" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Life Insurance (HLV)</a></li>
+              <li><a href="#/tools?tool=sip" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">SIP Calculator</a></li>
+              <li><a href="#/tools?tool=lumpsum" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Lumpsum Growth</a></li>
+              <li><a href="#/tools?tool=retirement-accum" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Retirement Planner</a></li>
+              <li><a href="#/tools?tool=swp" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">SWP Calculator</a></li>
+              <li><a href="#/tools?tool=emi" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">EMI Calculator</a></li>
+              <li><a href="#/tools?tool=home-afford" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Home Affordability</a></li>
+              <li><a href="#/tools?tool=tax" onClick={handleToolClick} className="text-sm hover:text-brandRed transition-colors">Salary & Tax</a></li>
             </ul>
           </div>
 
