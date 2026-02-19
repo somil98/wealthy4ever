@@ -1,0 +1,101 @@
+/* ============================================================
+   Wealthy4ever — Custom Component Styles
+   Served as /index.css at runtime (referenced in index.html).
+   These styles cover classes used inside React components that
+   Tailwind CDN cannot scan (they live in the compiled JS bundle).
+   ============================================================ */
+
+/* ---- Card components ---- */
+.card-input {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.card-result {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ---- Animations ---- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out both;
+}
+
+/* ---- Layout: main content area ---- */
+/*
+  On mobile the sidebar is fixed/hidden, so main takes full width.
+  Ensure it never overflows the viewport.
+*/
+main {
+  box-sizing: border-box;
+  /* p-4 equivalent on mobile, overridden at md/lg by Tailwind */
+  padding: 1rem;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+  main {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  main {
+    padding: 3rem;
+  }
+}
+
+/* Prevent any child from busting out of the viewport */
+.min-h-screen {
+  box-sizing: border-box;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* ---- Brand colour utilities (custom colours from tailwind config) ---- */
+/* These are referenced in JSX but Tailwind CDN may not generate them
+   if encountered only in the compiled bundle. */
+
+.bg-brand-blue   { background-color: #0047AB; }
+.text-brand-blue { color: #0047AB; }
+.border-brand-blue { border-color: #0047AB; }
+.accent-brand-blue { accent-color: #0047AB; }
+.hover\:bg-brand-blue:hover { background-color: #0047AB; }
+.focus\:ring-brand-blue:focus { --tw-ring-color: #0047AB; }
+
+.shadow-blue-500\/20 { box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.2); }
+
+/* Dark navy variant */
+.bg-brand-dark   { background-color: #1e3a8a; }
+.text-brand-dark { color: #1e3a8a; }
+
+/* Red brand */
+.bg-brandRed     { background-color: #DC2626; }
+.text-brandRed   { color: #DC2626; }
+
+/* ---- Font utilities ---- */
+.font-display {
+  font-family: 'Merriweather', serif;
+}
+
+/* ---- Selection ---- */
+::selection {
+  background-color: #0047AB;
+  color: #ffffff;
+}
