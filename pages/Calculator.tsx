@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line
 } from 'recharts';
@@ -137,19 +137,22 @@ const AdvancedSection = ({ isOpen, onToggle, children }: { isOpen: boolean; onTo
 // --- Main Component ---
 
 const Calculator: React.FC = () => {
-  const [activeTool, setActiveTool] = useState<CalculatorTab>('sip');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Load tool from URL when location changes
-  useEffect(() => {
+  // Derive activeTool directly from URL (single source of truth)
+  const activeTool = (() => {
     const searchParams = new URLSearchParams(location.search);
     const urlTool = searchParams.get('tool') as CalculatorTab;
-    if (urlTool && TOOLS.some(t => t.id === urlTool)) {
-      setActiveTool(urlTool);
-    }
-  }, [location]);
+    return urlTool && TOOLS.some(t => t.id === urlTool) ? urlTool : 'sip';
+  })();
+
+  // Update URL when switching tools — this is the single source of truth
+  const handleToolChange = (toolId: CalculatorTab) => {
+    navigate(`/tools?tool=${toolId}`, { replace: false });
+  };
 
   // Scroll to top on tool change
   useEffect(() => {
@@ -209,7 +212,7 @@ const Calculator: React.FC = () => {
                   return (
                     <button
                       key={tool.id}
-                      onClick={() => setActiveTool(tool.id)}
+                      onClick={() => handleToolChange(tool.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all
                         ${isActive
                           ? 'bg-brand-blue text-white shadow-md shadow-blue-500/20'
@@ -2307,14 +2310,14 @@ const AssetAllocationCalculator = () => {
   return (
     <div className="space-y-6">
       {/* Methodology Badge */}
-      <div className="flex items-center gap-2 text-xs text-slate-500 bg-blue-50 border border-blue-100 rounded-lg px-4 py-2 w-fit">
-        <CheckCircle size={14} className="text-brand-blue" />
+      <div className="flex items-center gap-2 text-xs text-slate-500 bg-blue-50 border border-blue-100 rounded-lg px-4 py-2">
+        <CheckCircle size={14} className="text-brand-blue flex-shrink-0" />
         <span><strong className="text-brand-blue">Verified Methodology:</strong> Vanguard glidepath + Brinson Study (1986) + Ibbotson & Kaplan (2000). Gold allocation per World Gold Council research. Sub-asset diversification per SEBI Indian MF norms.</span>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6">
         {/* LEFT PANEL */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="lg:col-span-4 space-y-4 min-w-0 overflow-hidden">
           {/* Profile Card */}
           <div className="card-input space-y-5">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Your Profile</h3>
@@ -2338,7 +2341,7 @@ const AssetAllocationCalculator = () => {
                 <label className="text-sm font-bold text-slate-700">Risk Appetite</label>
                 <span className="text-brand-blue font-bold text-sm">{RISK_LABELS[risk]}</span>
               </div>
-              <div className="flex gap-1">
+              <div className="flex flex-wrap gap-1">
                 {(['very-low', 'low', 'moderate', 'high', 'very-high'] as RiskLevel[]).map(r => (
                   <button key={r} onClick={() => setRisk(r)}
                     className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${risk === r
@@ -2403,7 +2406,7 @@ const AssetAllocationCalculator = () => {
                 >
                   {holdings.map(h => (
                     <div key={h.id} className="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <input
                           type="text"
                           value={h.name}
@@ -2413,7 +2416,7 @@ const AssetAllocationCalculator = () => {
                         <select
                           value={h.category}
                           onChange={e => updateHolding(h.id, 'category', e.target.value as HoldingCategory)}
-                          className="text-xs text-slate-600 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-brand-blue outline-none"
+                          className="text-xs text-slate-600 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-brand-blue outline-none min-w-0 max-w-[140px]"
                         >
                           {HOLDING_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -2487,7 +2490,7 @@ const AssetAllocationCalculator = () => {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="lg:col-span-8 space-y-4">
+        <div className="lg:col-span-8 space-y-4 min-w-0 overflow-hidden">
           {/* Portfolio Divergence Banner */}
           {showCurrentChart && (
             <div className={`rounded-2xl p-4 border flex items-center justify-between ${divergenceLevel === 'low'

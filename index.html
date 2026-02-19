@@ -107,6 +107,32 @@
   }
 }
 </script>
+  <!-- GitHub Pages SPA: restore path from the ?p= redirect set by 404.html -->
+  <script>
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+
+        // Check if there is a ?p= param in the URL (set by 404.html)
+        var search = window.location.search;
+        if (!redirect && search) {
+          var params = new URLSearchParams(search);
+          var p = params.get('p');
+          if (p) {
+            // Remove the ?p= param and replace the URL with the original path
+            params.delete('p');
+            var remainingSearch = params.toString();
+            // p might contain its own query string (e.g. /tools?tool=sip)
+            var decodedPath = decodeURIComponent(p);
+            window.history.replaceState(
+              null,
+              null,
+              decodedPath + (remainingSearch ? '&' + remainingSearch : '')
+            );
+          }
+        }
+      })();
+  </script>
   <link rel="stylesheet" href="/index.css">
 </head>
 
