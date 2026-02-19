@@ -94,22 +94,33 @@
     }
   </style>
 
-  <link rel="stylesheet" href="/index.css">
-
-  <!-- SPA path restore for GitHub Pages: reads the encoded path from 404.html redirect -->
+  <!-- GitHub Pages SPA: restore path from the ?p= redirect set by 404.html -->
   <script>
       (function () {
-        var redirect = window.location.search.slice(1);
-        if (redirect.startsWith('p=')) {
-          var decoded = decodeURIComponent(redirect.slice(2));
-          var queryIndex = decoded.indexOf('&q=');
-          var path = queryIndex !== -1 ? decoded.slice(0, queryIndex) : decoded.replace(/#.*/, '');
-          var query = queryIndex !== -1 ? '?' + decodeURIComponent(decoded.slice(queryIndex + 3)) : '';
-          var hash = decoded.indexOf('#') !== -1 ? decoded.slice(decoded.indexOf('#')) : '';
-          window.history.replaceState(null, null, '/' + path + query + hash);
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+
+        // Check if there is a ?p= param in the URL (set by 404.html)
+        var search = window.location.search;
+        if (!redirect && search) {
+          var params = new URLSearchParams(search);
+          var p = params.get('p');
+          if (p) {
+            // Remove the ?p= param and replace the URL with the original path
+            params.delete('p');
+            var remainingSearch = params.toString();
+            // p might contain its own query string (e.g. /tools?tool=sip)
+            var decodedPath = decodeURIComponent(p);
+            window.history.replaceState(
+              null,
+              null,
+              decodedPath + (remainingSearch ? '&' + remainingSearch : '')
+            );
+          }
         }
       })();
   </script>
+  <link rel="stylesheet" href="/index.css">
   <script type="importmap">
 {
   "imports": {
@@ -124,7 +135,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-D3EE4mzM.js"></script>
+  <script type="module" crossorigin src="/assets/index-CXXkD5u0.js"></script>
 </head>
 
 <body class="bg-slate-50 text-slate-900 antialiased selection:bg-brand-blue selection:text-white">

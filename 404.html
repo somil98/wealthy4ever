@@ -2,28 +2,23 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wealthy4ever</title>
-  <script>
-    // Single Page App redirect for GitHub Pages
-    // This script encodes the current path/query/hash into the redirect URL
-    // and sends the browser to the root, where the SPA can handle the route.
-    // See: https://github.com/rafgraph/spa-github-pages
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1).join('/') + // keep '' (root)
-      '/?p=' + encodeURIComponent(
-        l.pathname.slice(1) + (l.search ? '&q=' + encodeURIComponent(l.search.slice(1)) : '') +
-        l.hash
-      )
-    );
-  </script>
+    <meta charset="UTF-8" />
+    <title>Wealthy4ever</title>
+    <script>
+        // GitHub Pages SPA redirect hack.
+        // When GH Pages gets a request for a path it doesn't have (e.g. /tools),
+        // it serves this 404.html. We encode the full URL and redirect to the
+        // root index.html, which will restore the path and let React Router handle it.
+        (function () {
+            var l = window.location;
+            // Encode full path + search + hash as a ?p= query param on the root URL
+            var redirect = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+                '/?p=' + encodeURIComponent(l.pathname + l.search + l.hash);
+            l.replace(redirect);
+        })();
+    </script>
 </head>
 
-<body>
-  <!-- Redirecting... -->
-</body>
+<body></body>
 
 </html>
