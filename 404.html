@@ -3,16 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Favicons for Google Search and browsers -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/logo.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/logo.png" />
-    <link rel="shortcut icon" href="/logo.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/logo.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/logo.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-    
+    <link rel="icon" type="image/png" href="/logo.png" />
     <title>Wealthy4ever - Making Money Work For You</title>
     
     <!-- Open Graph / Facebook -->
@@ -98,28 +89,8 @@
 }
 </script>
 <link rel="stylesheet" href="/index.css">
-  </head>
+</head>
   <body class="bg-slate-50 text-slate-900 antialiased selection:bg-brand-blue selection:text-white">
-    <!-- GitHub Pages SPA fallback: redirect to index.html while preserving path -->
-    <script>
-      // This script runs when GitHub Pages serves 404.html for a direct route access
-      // It redirects to index.html while preserving the pathname and search params
-      (function() {
-        var pathSegmentsToKeep = 0; // Change to 1 if your site is in a subdirectory
-        var l = window.location;
-        var redirect = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          '/index.html' +
-          (l.pathname.slice(1) ? '?p=' + encodeURIComponent(l.pathname.slice(1)) : '') +
-          (l.search ? (l.pathname.slice(1) ? '&' : '?') + l.search.slice(1) : '') +
-          l.hash;
-        
-        // Store the original path in sessionStorage so React Router can use it
-        sessionStorage.setItem('redirectPath', l.pathname + l.search + l.hash);
-        
-        // Redirect to index.html
-        window.location.replace(redirect);
-      })();
-    </script>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
