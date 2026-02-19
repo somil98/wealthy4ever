@@ -95,6 +95,21 @@
   </style>
 
   <link rel="stylesheet" href="/index.css">
+
+  <!-- SPA path restore for GitHub Pages: reads the encoded path from 404.html redirect -->
+  <script>
+      (function () {
+        var redirect = window.location.search.slice(1);
+        if (redirect.startsWith('p=')) {
+          var decoded = decodeURIComponent(redirect.slice(2));
+          var queryIndex = decoded.indexOf('&q=');
+          var path = queryIndex !== -1 ? decoded.slice(0, queryIndex) : decoded.replace(/#.*/, '');
+          var query = queryIndex !== -1 ? '?' + decodeURIComponent(decoded.slice(queryIndex + 3)) : '';
+          var hash = decoded.indexOf('#') !== -1 ? decoded.slice(decoded.indexOf('#')) : '';
+          window.history.replaceState(null, null, '/' + path + query + hash);
+        }
+      })();
+  </script>
   <script type="importmap">
 {
   "imports": {
