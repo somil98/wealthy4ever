@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { 
+import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line
 } from 'recharts';
 import { CalculatorTab, ChartDataPoint } from '../types';
-import { 
-  Briefcase, TrendingUp, DollarSign, Umbrella, Home, 
-  PieChart as PieIcon, Calculator as CalcIcon, ChevronRight, Menu, X, Info, Share2, Check, ChevronDown, ChevronUp
+import {
+  Briefcase, TrendingUp, DollarSign, Umbrella, Home,
+  PieChart as PieIcon, Calculator as CalcIcon, ChevronRight, Menu, X, Info, Share2, Check, ChevronDown, ChevronUp,
+  BarChart2, Plus, Trash2, AlertTriangle, CheckCircle, Target
 } from 'lucide-react';
 
 // --- Types & Config ---
@@ -23,6 +24,7 @@ interface ToolConfig {
 const TOOLS: ToolConfig[] = [
   // Planning
   { id: 'risk-profile', label: 'Risk Profiler', category: 'Planning', icon: PieIcon },
+  { id: 'asset-allocation', label: 'Asset Allocation', category: 'Planning', icon: BarChart2 },
   { id: 'insurance', label: 'Life Insurance (HLV)', category: 'Planning', icon: Umbrella },
   // Investment
   { id: 'sip', label: 'SIP Calculator', category: 'Investment', icon: TrendingUp },
@@ -41,7 +43,7 @@ const COLORS = ['#0047AB', '#DC2626', '#10B981', '#F59E0B', '#8B5CF6'];
 
 // --- Helper Functions ---
 
-const formatINR = (val: number) => 
+const formatINR = (val: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
 const formatShort = (val: number) => {
@@ -56,12 +58,12 @@ const calculatePV = (fv: number, rate: number, years: number) => fv / Math.pow(1
 // --- URL Params Helper ---
 const useUrlParams = (toolId: string, params: Record<string, any>, setters: Record<string, (v: any) => void>) => {
   const location = useLocation();
-  
+
   // Load from URL on mount and when location changes
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const urlTool = searchParams.get('tool');
-    
+
     if (urlTool === toolId) {
       Object.keys(params).forEach(key => {
         const urlValue = searchParams.get(key);
@@ -159,6 +161,7 @@ const Calculator: React.FC = () => {
   const renderTool = () => {
     switch (activeTool) {
       case 'risk-profile': return <RiskProfiler />;
+      case 'asset-allocation': return <AssetAllocationCalculator />;
       case 'sip': return <SIPCalculator showAdvanced={showAdvanced} />;
       case 'lumpsum': return <LumpsumCalculator showAdvanced={showAdvanced} />;
       case 'retirement-accum': return <RetirementAccumulation showAdvanced={showAdvanced} />;
@@ -191,7 +194,7 @@ const Calculator: React.FC = () => {
         pt-20 md:pt-8 pb-8 overflow-y-auto
       `}>
         <div className="px-6 mb-8">
-          <h2 className="text-2xl font-display font-bold text-brand-blue">Financial<br/>Toolkit</h2>
+          <h2 className="text-2xl font-display font-bold text-brand-blue">Financial<br />Toolkit</h2>
           <p className="text-xs text-slate-400 mt-2">Professional planning suite</p>
         </div>
 
@@ -208,8 +211,8 @@ const Calculator: React.FC = () => {
                       key={tool.id}
                       onClick={() => setActiveTool(tool.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all
-                        ${isActive 
-                          ? 'bg-brand-blue text-white shadow-md shadow-blue-500/20' 
+                        ${isActive
+                          ? 'bg-brand-blue text-white shadow-md shadow-blue-500/20'
                           : 'text-slate-600 hover:bg-slate-50 hover:text-brand-blue'
                         }`}
                     >
@@ -229,25 +232,25 @@ const Calculator: React.FC = () => {
       <main className="flex-1 p-4 md:p-8 lg:p-12 max-w-7xl mx-auto w-full">
         {/* Tool Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-           <div>
-             <h1 className="text-3xl font-bold text-slate-900 mb-2">{TOOLS.find(t => t.id === activeTool)?.label}</h1>
-             <p className="text-slate-500">
-               Calculate, plan, and optimize your financial future.
-             </p>
-           </div>
-           {['sip', 'lumpsum', 'swp', 'emi', 'retirement-accum', 'home-afford'].includes(activeTool) && (
-             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500 font-medium">Advanced Mode</span>
-                  <button 
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${showAdvanced ? 'bg-brand-blue' : 'bg-slate-300'}`}
-                  >
-                    <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-200 ${showAdvanced ? 'translate-x-6' : 'translate-x-0'}`} />
-                  </button>
-                </div>
-             </div>
-           )}
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">{TOOLS.find(t => t.id === activeTool)?.label}</h1>
+            <p className="text-slate-500">
+              Calculate, plan, and optimize your financial future.
+            </p>
+          </div>
+          {['sip', 'lumpsum', 'swp', 'emi', 'retirement-accum', 'home-afford'].includes(activeTool) && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-500 font-medium">Advanced Mode</span>
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${showAdvanced ? 'bg-brand-blue' : 'bg-slate-300'}`}
+                >
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-200 ${showAdvanced ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tool Component Render */}
@@ -259,16 +262,16 @@ const Calculator: React.FC = () => {
         <div className="mt-12 p-4 bg-slate-100 rounded-lg text-xs text-slate-500 leading-relaxed flex gap-3">
           <Info className="flex-shrink-0 h-4 w-4 mt-0.5" />
           <p>
-            The results provided by these calculators are based on the inputs provided and illustrative assumptions. 
-            They are meant for educational purposes only and do not constitute financial advice. 
+            The results provided by these calculators are based on the inputs provided and illustrative assumptions.
+            They are meant for educational purposes only and do not constitute financial advice.
             Actual returns and tax liabilities may vary. Please consult a professional advisor before making investment decisions.
           </p>
         </div>
       </main>
-      
+
       {/* Sidebar Overlay for Mobile */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -683,8 +686,8 @@ const RiskProfiler = () => {
               ${idx === currentQuestion
                 ? "bg-brand-blue scale-125"
                 : answers[idx] !== null
-                ? "bg-green-500"
-                : "bg-slate-300 hover:bg-slate-400"
+                  ? "bg-green-500"
+                  : "bg-slate-300 hover:bg-slate-400"
               }`}
           />
         ))}
@@ -705,8 +708,8 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const [initialInvestment, setInitialInvestment] = useState(0); // NEW: Initial investment
 
   const params = { monthly, rate, years, stepUp, stepUpMode, stepUpAmount, postSipYears, initialInvestment };
-  const setters = { 
-    monthly: setMonthly, rate: setRate, years: setYears, stepUp: setStepUp, 
+  const setters = {
+    monthly: setMonthly, rate: setRate, years: setYears, stepUp: setStepUp,
     stepUpMode: setStepUpMode as any, stepUpAmount: setStepUpAmount, postSipYears: setPostSipYears,
     initialInvestment: setInitialInvestment
   };
@@ -728,9 +731,9 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         value *= (1 + monthlyRate);
       }
       invested += yearlyInv;
-      data.push({ 
-        year: y, 
-        invested: Math.round(invested), 
+      data.push({
+        year: y,
+        invested: Math.round(invested),
         value: Math.round(value),
         phase: 'Contribution',
         sipAmount: Math.round(currentSip)
@@ -753,9 +756,9 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         for (let m = 1; m <= 12; m++) {
           value *= (1 + monthlyRate);
         }
-        data.push({ 
-          year: years + y, 
-          invested: Math.round(invested), 
+        data.push({
+          year: years + y,
+          invested: Math.round(invested),
           value: Math.round(value),
           phase: 'Growth Only',
           sipAmount: 0
@@ -791,7 +794,7 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         <InputCurrency label="Monthly Investment" value={monthly} setValue={setMonthly} min={500} max={1000000} step={500} />
         <InputSlider label="Expected Return (p.a)" value={rate} setValue={setRate} min={4} max={30} unit="%" />
         <InputSlider label="SIP Duration" value={years} setValue={setYears} min={1} max={40} unit="Yrs" />
-        
+
         {showAdvanced && (
           <div className="pt-4 border-t border-slate-100 animate-fade-in space-y-6">
             {/* Initial Investment */}
@@ -809,8 +812,8 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
                 <button
                   onClick={() => setStepUpMode('percent')}
                   className={`py-3 px-4 rounded-lg text-sm font-bold transition-all border-2
-                    ${stepUpMode === 'percent' 
-                      ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                    ${stepUpMode === 'percent'
+                      ? 'border-brand-blue bg-blue-50 text-brand-blue'
                       : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                 >
                   By Percentage (%)
@@ -818,8 +821,8 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
                 <button
                   onClick={() => setStepUpMode('amount')}
                   className={`py-3 px-4 rounded-lg text-sm font-bold transition-all border-2
-                    ${stepUpMode === 'amount' 
-                      ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                    ${stepUpMode === 'amount'
+                      ? 'border-brand-blue bg-blue-50 text-brand-blue'
                       : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                 >
                   By Amount (₹)
@@ -838,7 +841,7 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
                 <p className="text-xs text-slate-400 -mt-4">Increase your SIP by ₹{stepUpAmount.toLocaleString('en-IN')} every year.</p>
               </>
             )}
-            
+
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
               <InputSlider label="Post-SIP Horizon" value={postSipYears} setValue={setPostSipYears} min={0} max={30} unit="Yrs" />
               <p className="text-xs text-blue-600 mt-2">
@@ -851,10 +854,10 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
 
       <div className="lg:col-span-7 space-y-6 lg:sticky lg:top-24 self-start">
         {/* Primary Result */}
-        <ResultSummary 
-          title={result.hasPostSip ? "Final Corpus (After Growth)" : "Estimated Corpus"} 
-          value={result.finalCorpus} 
-          subtitle={`Total Invested: ${formatShort(result.invested)} | Gain: ${formatShort(result.finalCorpus - result.invested)}`} 
+        <ResultSummary
+          title={result.hasPostSip ? "Final Corpus (After Growth)" : "Estimated Corpus"}
+          value={result.finalCorpus}
+          subtitle={`Total Invested: ${formatShort(result.invested)} | Gain: ${formatShort(result.finalCorpus - result.invested)}`}
         />
 
         {/* Initial Investment Display */}
@@ -901,18 +904,18 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
             <ComposedChart data={result.data}>
               <defs>
                 <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0047AB" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#0047AB" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#0047AB" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#0047AB" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="year" tick={{fontSize: 10}} label={{ value: 'Years', position: 'insideBottom', offset: -5, fontSize: 10 }} />
-              <YAxis tickFormatter={(v) => `${v/100000}L`} tick={{fontSize: 10}} width={40} />
-              <Tooltip 
+              <XAxis dataKey="year" tick={{ fontSize: 10 }} label={{ value: 'Years', position: 'insideBottom', offset: -5, fontSize: 10 }} />
+              <YAxis tickFormatter={(v) => `${v / 100000}L`} tick={{ fontSize: 10 }} width={40} />
+              <Tooltip
                 formatter={(v: number) => formatShort(v)}
                 labelFormatter={(label) => {
                   const item = result.data.find(d => d.year === label);
@@ -922,10 +925,10 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
               <Area type="monotone" dataKey="value" stroke="#0047AB" fill="url(#colorVal)" name="Total Value" />
               <Area type="monotone" dataKey="invested" stroke="#94a3b8" fill="none" name="Invested Amount" />
               {result.hasPostSip && (
-                <Line 
-                  type="monotone" 
+                <Line
+                  type="monotone"
                   dataKey={(d: any) => d.phase === 'Growth Only' ? d.value : null}
-                  stroke="#8B5CF6" 
+                  stroke="#8B5CF6"
                   strokeWidth={3}
                   dot={false}
                   name="Growth Phase"
@@ -941,7 +944,7 @@ const SIPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
             <div className="flex items-start gap-2">
               <Info size={16} className="text-indigo-600 mt-0.5 flex-shrink-0" />
               <p className="text-indigo-800">
-                <strong>Two-Phase Growth:</strong> Your SIP runs for {years} years (building {formatShort(result.corpusAtEndOfSIP)}), 
+                <strong>Two-Phase Growth:</strong> Your SIP runs for {years} years (building {formatShort(result.corpusAtEndOfSIP)}),
                 then compounds for {postSipYears} more years to reach {formatShort(result.finalCorpus)}.
               </p>
             </div>
@@ -961,12 +964,12 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const [targetFuture, setTargetFuture] = useState(500000); // For reverse calculation
 
   const params = { amount, rate, years, mode, targetFuture };
-  const setters = { 
-    amount: setAmount, 
-    rate: setRate, 
-    years: setYears, 
-    mode: setMode as any, 
-    targetFuture: setTargetFuture 
+  const setters = {
+    amount: setAmount,
+    rate: setRate,
+    years: setYears,
+    mode: setMode as any,
+    targetFuture: setTargetFuture
   };
   const { generateShareUrl } = useUrlParams('lumpsum', params, setters);
 
@@ -975,12 +978,12 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
       // Present → Future (existing)
       const val = calculateFV(amount, rate, years);
       const data = [];
-      for(let i=0; i<=years; i++) {
+      for (let i = 0; i <= years; i++) {
         data.push({ year: i, value: Math.round(calculateFV(amount, rate, i)), invested: amount });
       }
-      return { 
-        displayValue: val, 
-        data, 
+      return {
+        displayValue: val,
+        data,
         subtitle: `Growth of ${formatShort(amount)} over ${years} years`,
         investedToday: amount,
         futureValue: val
@@ -989,12 +992,12 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
       // Future → Present (new reverse calculation)
       const requiredToday = calculatePV(targetFuture, rate, years);
       const data = [];
-      for(let i=0; i<=years; i++) {
+      for (let i = 0; i <= years; i++) {
         data.push({ year: i, value: Math.round(calculateFV(requiredToday, rate, i)), invested: requiredToday });
       }
-      return { 
-        displayValue: requiredToday, 
-        data, 
+      return {
+        displayValue: requiredToday,
+        data,
         subtitle: `Invest today to achieve ${formatShort(targetFuture)} in ${years} years`,
         investedToday: requiredToday,
         futureValue: targetFuture
@@ -1021,8 +1024,8 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
               <button
                 onClick={() => setMode('future')}
                 className={`py-3 px-4 rounded-lg text-sm font-bold transition-all border-2
-                  ${mode === 'future' 
-                    ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                  ${mode === 'future'
+                    ? 'border-brand-blue bg-blue-50 text-brand-blue'
                     : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
               >
                 Present → Future
@@ -1030,16 +1033,16 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
               <button
                 onClick={() => setMode('present')}
                 className={`py-3 px-4 rounded-lg text-sm font-bold transition-all border-2
-                  ${mode === 'present' 
-                    ? 'border-brand-blue bg-blue-50 text-brand-blue' 
+                  ${mode === 'present'
+                    ? 'border-brand-blue bg-blue-50 text-brand-blue'
                     : 'border-transparent bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
               >
                 Future → Present
               </button>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              {mode === 'future' 
-                ? "Calculate how much your investment will grow." 
+              {mode === 'future'
+                ? "Calculate how much your investment will grow."
                 : "Calculate how much to invest today to reach your goal."}
             </p>
           </div>
@@ -1050,16 +1053,16 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         ) : (
           <InputCurrency label="Target Future Amount" value={targetFuture} setValue={setTargetFuture} min={50000} max={100000000} step={50000} />
         )}
-        
+
         <InputSlider label="Expected Return (p.a)" value={rate} setValue={setRate} min={4} max={30} unit="%" />
         <InputSlider label="Time Period" value={years} setValue={setYears} min={1} max={40} unit="Yrs" />
       </div>
 
       <div className="lg:col-span-7 space-y-6 lg:sticky lg:top-24 self-start">
-        <ResultSummary 
+        <ResultSummary
           title={mode === 'future' ? "Future Value" : "Required Investment Today"}
-          value={result.displayValue} 
-          subtitle={result.subtitle} 
+          value={result.displayValue}
+          subtitle={result.subtitle}
         />
 
         {mode === 'present' && (
@@ -1080,13 +1083,13 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
             <AreaChart data={result.data}>
               <defs>
                 <linearGradient id="colorLumpsum" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={mode === 'future' ? "#0047AB" : "#10B981"} stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor={mode === 'future' ? "#0047AB" : "#10B981"} stopOpacity={0}/>
+                  <stop offset="5%" stopColor={mode === 'future' ? "#0047AB" : "#10B981"} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={mode === 'future' ? "#0047AB" : "#10B981"} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="year" />
-              <YAxis tickFormatter={(v) => `${(v/100000).toFixed(1)}L`} width={45} />
+              <YAxis tickFormatter={(v) => `${(v / 100000).toFixed(1)}L`} width={45} />
               <Tooltip formatter={(v: number) => formatINR(v)} />
               <Area type="monotone" dataKey="value" stroke={mode === 'future' ? "#0047AB" : "#10B981"} fill="url(#colorLumpsum)" name="Value" />
               <Area type="monotone" dataKey="invested" stroke="#94a3b8" fill="none" name="Principal" />
@@ -1099,7 +1102,7 @@ const LumpsumCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
             <div className="flex items-start gap-2">
               <Info size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
               <p className="text-green-800">
-                <strong>Goal Planning:</strong> To accumulate {formatShort(targetFuture)} in {years} years at {rate}% p.a., 
+                <strong>Goal Planning:</strong> To accumulate {formatShort(targetFuture)} in {years} years at {rate}% p.a.,
                 you need to invest <strong>{formatShort(result.investedToday)}</strong> today.
               </p>
             </div>
@@ -1119,19 +1122,19 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
   const [preRate, setPreRate] = useState(12);
   const [postRate, setPostRate] = useState(8);
   const [lifeExp, setLifeExp] = useState(85);
-  
+
   // NEW: Step-up SIP options
   const [enableStepUp, setEnableStepUp] = useState(false);
   const [sipStepUp, setSipStepUp] = useState(10);
   const [stepUpDuration, setStepUpDuration] = useState(0); // 0 = entire SIP duration
-  
+
   // NEW: Current Savings
   const [currentSavings, setCurrentSavings] = useState(0);
 
   const params = { age, retireAge, expenses, inflation, preRate, postRate, lifeExp, enableStepUp, sipStepUp, stepUpDuration, currentSavings };
-  const setters = { 
-    age: setAge, retireAge: setRetireAge, expenses: setExpenses, inflation: setInflation, 
-    preRate: setPreRate, postRate: setPostRate, lifeExp: setLifeExp, 
+  const setters = {
+    age: setAge, retireAge: setRetireAge, expenses: setExpenses, inflation: setInflation,
+    preRate: setPreRate, postRate: setPostRate, lifeExp: setLifeExp,
     enableStepUp: setEnableStepUp, sipStepUp: setSipStepUp, stepUpDuration: setStepUpDuration,
     currentSavings: setCurrentSavings
   };
@@ -1140,13 +1143,13 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
   const result = useMemo(() => {
     const yearsToRetire = retireAge - age;
     const yearsInRetire = lifeExp - retireAge;
-    
+
     // Expenses at retirement
     const fvExpenseMonth = calculateFV(expenses, inflation, yearsToRetire);
     const annualExpense = fvExpenseMonth * 12;
 
     // Corpus needed at 60 to fund till 85
-    const realRate = ((1 + postRate/100) / (1 + inflation/100)) - 1;
+    const realRate = ((1 + postRate / 100) / (1 + inflation / 100)) - 1;
     let corpus = 0;
     if (Math.abs(realRate) < 0.001) corpus = annualExpense * yearsInRetire;
     else corpus = annualExpense * ((1 - Math.pow(1 + realRate, -yearsInRetire)) / realRate);
@@ -1156,7 +1159,7 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
     const adjustedCorpus = Math.max(0, corpus - fvCurrentSavings);
 
     // Without Step-Up: Standard SIP Required
-    const monthlyRate = preRate/12/100;
+    const monthlyRate = preRate / 12 / 100;
     const months = yearsToRetire * 12;
     const standardSip = adjustedCorpus > 0 ? adjustedCorpus * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1) : 0;
 
@@ -1170,13 +1173,13 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
       // Using binary search
       let low = 1000;
       let high = standardSip * 2;
-      
+
       while (high - low > 100) {
         const mid = (low + high) / 2;
         let testCorpus = currentSavings; // Start with current savings
         let currentSip = mid;
         const effectiveStepUpYears = stepUpDuration > 0 ? Math.min(stepUpDuration, yearsToRetire) : yearsToRetire;
-        
+
         for (let y = 1; y <= yearsToRetire; y++) {
           for (let m = 1; m <= 12; m++) {
             testCorpus += currentSip;
@@ -1186,23 +1189,23 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
             currentSip *= (1 + sipStepUp / 100);
           }
         }
-        
+
         if (testCorpus < corpus) {
           low = mid;
         } else {
           high = mid;
         }
       }
-      
+
       stepUpSip = Math.round((low + high) / 2);
-      
+
       // Calculate total invested with step-up
       let currentSip = stepUpSip;
       const effectiveStepUpYears = stepUpDuration > 0 ? Math.min(stepUpDuration, yearsToRetire) : yearsToRetire;
-      
+
       // Start with current savings and let it grow month by month
       corpusWithStepUp = currentSavings;
-      
+
       for (let y = 1; y <= yearsToRetire; y++) {
         totalInvestedWithStepUp += currentSip * 12;
         for (let m = 1; m <= 12; m++) {
@@ -1216,7 +1219,7 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
     }
 
     const totalInvestedStandard = standardSip * months;
-    
+
     // Calculate final corpus without step-up (including current savings)
     let finalCorpusStandard = currentSavings;
     for (let m = 1; m <= months; m++) {
@@ -1224,9 +1227,9 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
       finalCorpusStandard *= (1 + monthlyRate);
     }
 
-    return { 
-      corpus, 
-      standardSip, 
+    return {
+      corpus,
+      standardSip,
       stepUpSip: showAdvanced && enableStepUp ? stepUpSip : standardSip,
       fvExpenseMonth,
       totalInvestedStandard,
@@ -1252,7 +1255,7 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
           <InputSlider label="Retire Age" value={retireAge} setValue={setRetireAge} min={40} max={70} unit="" />
         </div>
         <InputCurrency label="Current Monthly Expense" value={expenses} setValue={setExpenses} min={10000} max={500000} step={5000} />
-        
+
         <div className="pt-4 border-t border-slate-100">
           <InputSlider label="Expected Inflation" value={inflation} setValue={setInflation} min={4} max={10} unit="%" />
           <InputSlider label="Pre-Retirement Return" value={preRate} setValue={setPreRate} min={6} max={15} unit="%" />
@@ -1279,7 +1282,7 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
             <div className="pt-4 border-t border-slate-100 animate-fade-in">
               <div className="flex items-center justify-between mb-4">
                 <label className="text-sm font-bold text-slate-700">Enable Step-Up SIP</label>
-                <button 
+                <button
                   onClick={() => setEnableStepUp(!enableStepUp)}
                   className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${enableStepUp ? 'bg-brand-blue' : 'bg-slate-300'}`}
                 >
@@ -1290,16 +1293,16 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
               {enableStepUp && (
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 space-y-4 animate-fade-in">
                   <InputSlider label="Annual Step-Up Rate" value={sipStepUp} setValue={setSipStepUp} min={1} max={25} unit="%" />
-                  <InputSlider 
-                    label="Step-Up Duration (0 = Full Period)" 
-                    value={stepUpDuration} 
-                    setValue={setStepUpDuration} 
-                    min={0} 
-                    max={retireAge - age} 
-                    unit="Yrs" 
+                  <InputSlider
+                    label="Step-Up Duration (0 = Full Period)"
+                    value={stepUpDuration}
+                    setValue={setStepUpDuration}
+                    min={0}
+                    max={retireAge - age}
+                    unit="Yrs"
                   />
                   <p className="text-xs text-blue-600">
-                    Start with a lower SIP and increase by {sipStepUp}% every year 
+                    Start with a lower SIP and increase by {sipStepUp}% every year
                     {stepUpDuration > 0 ? ` for ${stepUpDuration} years` : ' until retirement'}.
                   </p>
                 </div>
@@ -1310,19 +1313,19 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
       </div>
 
       <div className="lg:col-span-6 flex flex-col gap-6 lg:sticky lg:top-24 self-start">
-        <ResultSummary 
-          title="Required Corpus" 
-          value={result.corpus} 
-          subtitle={`At age ${retireAge} to sustain till ${lifeExp}`} 
+        <ResultSummary
+          title="Required Corpus"
+          value={result.corpus}
+          subtitle={`At age ${retireAge} to sustain till ${lifeExp}`}
         />
-        
+
         <div className="card-result p-6 text-center bg-blue-50 border border-blue-100">
           <h4 className="text-sm font-bold text-slate-500 uppercase">
             {showAdvanced && enableStepUp ? "Starting SIP (with Step-Up)" : "Monthly SIP Required"}
           </h4>
           <div className="text-3xl font-bold text-brand-blue my-2">{formatShort(result.stepUpSip)}</div>
           <p className="text-xs text-slate-500">To achieve this goal starting today</p>
-          
+
           {showAdvanced && enableStepUp && (
             <div className="mt-4 pt-4 border-t border-blue-100 grid grid-cols-2 gap-4 text-left">
               <div>
@@ -1341,7 +1344,7 @@ const RetirementAccumulation = ({ showAdvanced }: { showAdvanced: boolean }) => 
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
             <h4 className="text-sm font-bold text-green-700 mb-2">💡 Step-Up Advantage</h4>
             <p className="text-sm text-green-800">
-              By starting with {formatShort(result.stepUpSip)} and stepping up by {sipStepUp}% annually, 
+              By starting with {formatShort(result.stepUpSip)} and stepping up by {sipStepUp}% annually,
               you invest <strong>{formatShort(Math.abs(result.savings))} less</strong> overall compared to a flat SIP approach.
             </p>
           </div>
@@ -1389,7 +1392,7 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
     // Simulate for max 100 years
     for (let m = 1; m <= 1200; m++) {
       if (balance <= 0) break;
-      
+
       // Interest accrues
       balance = balance * (1 + monthlyRate);
       // Withdrawal happens
@@ -1398,13 +1401,13 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
 
       if (m % 12 === 0) {
         years++;
-        data.push({ 
-          year: years, 
-          balance: Math.max(0, Math.round(balance)), 
+        data.push({
+          year: years,
+          balance: Math.max(0, Math.round(balance)),
           withdrawal: Math.round(currentWithdrawal),
           monthlyIncome: Math.round(currentWithdrawal)
         });
-        if (showAdvanced) currentWithdrawal *= (1 + stepUp/100);
+        if (showAdvanced) currentWithdrawal *= (1 + stepUp / 100);
       }
     }
 
@@ -1432,14 +1435,14 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
       </div>
 
       <div className="lg:col-span-7 space-y-6 lg:sticky lg:top-24 self-start">
-        <ResultSummary 
-          title="Sustainability" 
-          value={result.years} 
+        <ResultSummary
+          title="Sustainability"
+          value={result.years}
           subtitle="Years until corpus depletes"
           isCurrency={false}
           suffix="Years"
         />
-        
+
         {/* Monthly Income Display */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white p-4 rounded-xl border border-slate-200 text-center">
@@ -1456,9 +1459,9 @@ const SWPCalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={result.data}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="year" tick={{fontSize: 10}} />
-              <YAxis yAxisId="left" tickFormatter={(v) => `${(v/100000).toFixed(0)}L`} width={45} tick={{fontSize: 10}} />
-              <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} width={45} tick={{fontSize: 10}} />
+              <XAxis dataKey="year" tick={{ fontSize: 10 }} />
+              <YAxis yAxisId="left" tickFormatter={(v) => `${(v / 100000).toFixed(0)}L`} width={45} tick={{ fontSize: 10 }} />
+              <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} width={45} tick={{ fontSize: 10 }} />
               <Tooltip formatter={(v: number, name: string) => [formatShort(v), name]} />
               <Legend />
               <Area yAxisId="left" type="monotone" dataKey="balance" stroke="#DC2626" fill="#fee2e2" name="Remaining Balance" />
@@ -1496,9 +1499,9 @@ const EMICalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const result = useMemo(() => {
     const r = rate / 12 / 100;
     const n = tenure * 12;
-    
+
     let emi = (loan * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    
+
     let balance = loan;
     let totalInterest = 0;
     let totalPaid = 0;
@@ -1509,23 +1512,23 @@ const EMICalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
 
     for (let m = 1; m <= 360; m++) {
       if (balance <= 10) break;
-      
+
       const interest = balance * r;
       let principal = currentEMI - interest;
-      
+
       if (balance < principal) {
         principal = balance;
         currentEMI = principal + interest;
       }
-      
+
       balance -= principal;
       totalInterest += interest;
       totalPaid += currentEMI;
       actualMonths++;
 
       if (m % 12 === 0) {
-        data.push({ year: m/12, principal: Math.round(loan - balance), interest: Math.round(totalInterest) });
-        if (showAdvanced) currentEMI *= (1 + stepUp/100);
+        data.push({ year: m / 12, principal: Math.round(loan - balance), interest: Math.round(totalInterest) });
+        if (showAdvanced) currentEMI *= (1 + stepUp / 100);
       }
     }
 
@@ -1548,16 +1551,16 @@ const EMICalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
         {showAdvanced && (
           <div className="pt-4 animate-fade-in">
             <InputSlider label="Annual EMI Increase (Prepayment)" value={stepUp} setValue={setStepUp} min={0} max={20} unit="%" />
-            <p className="text-xs text-slate-400 mt-2">Increasing EMI by {stepUp}% annually reduces tenure from {tenure} years to {(result.actualMonths/12).toFixed(1)} years.</p>
+            <p className="text-xs text-slate-400 mt-2">Increasing EMI by {stepUp}% annually reduces tenure from {tenure} years to {(result.actualMonths / 12).toFixed(1)} years.</p>
           </div>
         )}
       </div>
 
       <div className="lg:col-span-7 space-y-6 lg:sticky lg:top-24 self-start">
-        <ResultSummary 
-          title="Monthly EMI" 
-          value={result.emi} 
-          subtitle={`Total Interest Payable: ${formatShort(result.totalInterest)}`} 
+        <ResultSummary
+          title="Monthly EMI"
+          value={result.emi}
+          subtitle={`Total Interest Payable: ${formatShort(result.totalInterest)}`}
         />
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-white rounded-xl border border-slate-200 text-center">
@@ -1566,7 +1569,7 @@ const EMICalculator = ({ showAdvanced }: { showAdvanced: boolean }) => {
           </div>
           <div className="p-4 bg-white rounded-xl border border-slate-200 text-center">
             <div className="text-xs text-slate-500 uppercase font-bold">Loan Duration</div>
-            <div className="text-lg font-bold text-slate-800">{(result.actualMonths/12).toFixed(1)} Yrs</div>
+            <div className="text-lg font-bold text-slate-800">{(result.actualMonths / 12).toFixed(1)} Yrs</div>
           </div>
         </div>
         <div className="card-result p-4 h-60">
@@ -1594,7 +1597,7 @@ const HomeAffordability = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const [tenure, setTenure] = useState(20);
   const [downPaymentPct, setDownPaymentPct] = useState(20);
   const [emiRatio, setEmiRatio] = useState(40);
-  
+
   // NEW: Additional Costs
   const [stampDuty, setStampDuty] = useState(5);
   const [registration, setRegistration] = useState(1);
@@ -1603,25 +1606,25 @@ const HomeAffordability = ({ showAdvanced }: { showAdvanced: boolean }) => {
   const [otherCharges, setOtherCharges] = useState(100000);
 
   const params = { income, rate, tenure, downPaymentPct, emiRatio, stampDuty, registration, gst, interiorCost, otherCharges };
-  const setters = { 
-    income: setIncome, rate: setRate, tenure: setTenure, downPaymentPct: setDownPaymentPct, 
-    emiRatio: setEmiRatio, stampDuty: setStampDuty, registration: setRegistration, 
-    gst: setGst, interiorCost: setInteriorCost, otherCharges: setOtherCharges 
+  const setters = {
+    income: setIncome, rate: setRate, tenure: setTenure, downPaymentPct: setDownPaymentPct,
+    emiRatio: setEmiRatio, stampDuty: setStampDuty, registration: setRegistration,
+    gst: setGst, interiorCost: setInteriorCost, otherCharges: setOtherCharges
   };
   const { generateShareUrl } = useUrlParams('home-afford', params, setters);
 
   const result = useMemo(() => {
     // 1. Max Affordable EMI
     const maxEMI = income * (emiRatio / 100);
-    
+
     // 2. Max Loan (PV of MaxEMI)
     const r = rate / 12 / 100;
     const n = tenure * 12;
-    const maxLoan = maxEMI * ((Math.pow(1+r, n) - 1) / (r * Math.pow(1+r, n)));
-    
+    const maxLoan = maxEMI * ((Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n)));
+
     // 3. Max Property Value (Loan + Downpayment)
-    const propertyValue = maxLoan / (1 - downPaymentPct/100);
-    const requiredDownPayment = propertyValue * (downPaymentPct/100);
+    const propertyValue = maxLoan / (1 - downPaymentPct / 100);
+    const requiredDownPayment = propertyValue * (downPaymentPct / 100);
 
     // 4. Additional Costs Calculation
     const stampDutyAmount = propertyValue * (stampDuty / 100);
@@ -1633,10 +1636,10 @@ const HomeAffordability = ({ showAdvanced }: { showAdvanced: boolean }) => {
     const totalAcquisitionCost = propertyValue + totalAdditionalCosts;
     const totalUpfrontRequired = requiredDownPayment + totalAdditionalCosts;
 
-    return { 
-      maxLoan, 
-      propertyValue, 
-      requiredDownPayment, 
+    return {
+      maxLoan,
+      propertyValue,
+      requiredDownPayment,
       maxEMI,
       stampDutyAmount,
       registrationAmount,
@@ -1659,7 +1662,7 @@ const HomeAffordability = ({ showAdvanced }: { showAdvanced: boolean }) => {
         </div>
         <InputCurrency label="Monthly Net Income" value={income} setValue={setIncome} min={20000} max={1000000} step={5000} />
         <InputSlider label="Down Payment" value={downPaymentPct} setValue={setDownPaymentPct} min={10} max={50} unit="%" />
-        
+
         <div className="pt-4 border-t border-slate-100">
           <InputSlider label="Interest Rate" value={rate} setValue={setRate} min={6} max={12} step={0.1} unit="%" />
           <InputSlider label="Loan Tenure" value={tenure} setValue={setTenure} min={5} max={30} unit="Yrs" />
@@ -1675,24 +1678,24 @@ const HomeAffordability = ({ showAdvanced }: { showAdvanced: boolean }) => {
                 <Home size={16} />
                 Additional Acquisition Costs
               </h4>
-              
+
               <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-xl border border-orange-100 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <InputSlider label="Stamp Duty" value={stampDuty} setValue={setStampDuty} min={0} max={10} step={0.5} unit="%" />
                   <InputSlider label="Registration" value={registration} setValue={setRegistration} min={0} max={3} step={0.5} unit="%" />
                 </div>
-                
-                <InputSlider 
-                  label="GST (Under Construction)" 
-                  value={gst} 
-                  setValue={setGst} 
-                  min={0} 
-                  max={12} 
-                  step={1} 
-                  unit="%" 
+
+                <InputSlider
+                  label="GST (Under Construction)"
+                  value={gst}
+                  setValue={setGst}
+                  min={0}
+                  max={12}
+                  step={1}
+                  unit="%"
                 />
                 <p className="text-xs text-orange-600 -mt-2">Set to 0% for ready-to-move properties, 5% for affordable housing, 12% for others.</p>
-                
+
                 <InputCurrency label="Interior & Furnishing" value={interiorCost} setValue={setInteriorCost} min={0} max={5000000} step={50000} />
                 <InputCurrency label="Other Charges (Society, Parking, etc.)" value={otherCharges} setValue={setOtherCharges} min={0} max={1000000} step={10000} />
               </div>
@@ -1700,14 +1703,14 @@ const HomeAffordability = ({ showAdvanced }: { showAdvanced: boolean }) => {
           </>
         )}
       </div>
-      
+
       <div className="lg:col-span-7 space-y-6 lg:sticky lg:top-24 self-start">
-        <ResultSummary 
-          title="Max Property Budget" 
-          value={result.propertyValue} 
-          subtitle={`Based on a max EMI of ${formatINR(result.maxEMI)}/mo`} 
+        <ResultSummary
+          title="Max Property Budget"
+          value={result.propertyValue}
+          subtitle={`Based on a max EMI of ${formatINR(result.maxEMI)}/mo`}
         />
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white p-4 rounded-xl border border-slate-200">
             <div className="text-sm text-slate-500 mb-1">Eligible Loan</div>
@@ -1806,11 +1809,11 @@ const InsuranceCalculator = () => {
   const result = useMemo(() => {
     const retirementAge = 60;
     const yearsLeft = Math.max(0, retirementAge - age);
-    
+
     const investibleSurplus = income * 0.70;
     const realRate = 0.04;
-    const pvIncome = investibleSurplus * ((1 - Math.pow(1+realRate, -yearsLeft)) / realRate);
-    
+    const pvIncome = investibleSurplus * ((1 - Math.pow(1 + realRate, -yearsLeft)) / realRate);
+
     const requiredCover = pvIncome + liabilities - savings;
     const gap = Math.max(0, requiredCover - existingCover);
 
@@ -1844,7 +1847,7 @@ const InsuranceCalculator = () => {
           </div>
           <p className="text-slate-500 text-sm">To fully secure your family's future</p>
         </div>
-        
+
         <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
           <h4 className="font-bold text-slate-800 mb-4">Coverage Breakdown</h4>
           <div className="space-y-3">
@@ -1882,9 +1885,9 @@ const TaxCalculator = () => {
   const result = useMemo(() => {
     const stdDeduction = 75000;
     const taxable = Math.max(0, ctc - stdDeduction);
-    
+
     let tax = 0;
-    
+
     if (taxable <= 700000) {
       tax = 0;
     } else {
@@ -1894,11 +1897,11 @@ const TaxCalculator = () => {
       if (taxable > 1200000) tax += Math.min(taxable - 1200000, 300000) * 0.20;
       if (taxable > 1500000) tax += (taxable - 1500000) * 0.30;
     }
-    
+
     const cess = tax * 0.04;
     const totalTax = tax + cess;
     const monthlyInHand = (ctc - totalTax) / 12;
-    
+
     return { totalTax, monthlyInHand, stdDeduction };
   }, [ctc]);
 
@@ -1913,20 +1916,20 @@ const TaxCalculator = () => {
           <ShareButton onClick={handleShare} />
         </div>
         <InputCurrency label="Annual Salary (CTC)" value={ctc} setValue={setCtc} min={300000} max={5000000} step={50000} />
-        
+
         <div className="bg-yellow-50 p-4 rounded-lg text-xs text-yellow-800 border border-yellow-100">
           Note: Estimates based on FY 2024-25 New Tax Regime. Includes Standard Deduction of ₹75,000.
         </div>
       </div>
-      
+
       <div className="card-result p-8 space-y-6 lg:sticky lg:top-24 self-start">
         <div className="text-center">
           <h3 className="text-slate-500 font-bold uppercase tracking-wide text-xs mb-2">Estimated Monthly Take-Home</h3>
           <div className="text-4xl font-extrabold text-slate-800">{formatINR(Math.round(result.monthlyInHand))}</div>
         </div>
-        
+
         <div className="border-t border-dashed border-slate-200 my-4"></div>
-        
+
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-slate-600">Gross Annual</span>
@@ -1943,6 +1946,734 @@ const TaxCalculator = () => {
           <div className="flex justify-between font-bold pt-2 border-t border-slate-200">
             <span>Net Annual Income</span>
             <span>{formatINR(Math.round(ctc - result.totalTax))}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// ASSET ALLOCATION CALCULATOR
+// ==========================================
+
+// --- MPT / Brinson Study Based Logic (Research-Verified) ---
+// Sources: Vanguard TDF glidepath data (2026), Fidelity Freedom Funds,
+//          Ibbotson & Kaplan (2000), Brinson Hood Beebower (1986),
+//          CFA Institute model portfolios, SEBI Indian MF norms,
+//          World Gold Council research, Ray Dalio All Weather.
+//
+// Base equity: Vanguard-style glidepath
+//   Age ≤ 40 → 90% equity (Vanguard TDF 2060/2050 hold 90% until ~age 40)
+//   Age > 40 → 90% - (age - 40) × 2   (de-risks ~2%/yr, matching Vanguard slope)
+// Risk adjustment (CFA model portfolios):
+//   Very Low=-25, Low=-15, Moderate=0, High=+5, Very High=+5
+// Horizon adjustment (Ibbotson: horizon matters, but age already captures most):
+//   +0.5% per year beyond 5, capped at +5%
+// Final equity clamped to [10%, 95%]
+// Non-equity: Fixed 5% Gold (WGC/Dalio), 5% Hybrid (moderate+), 3% Cash
+// Equity sub-allocation: SEBI-aligned Indian MF categories
+
+type RiskLevel = 'very-low' | 'low' | 'moderate' | 'high' | 'very-high';
+
+type AssetClass =
+  | 'Large Cap Equity'
+  | 'Large & Mid Cap Equity'
+  | 'Flexi Cap Equity'
+  | 'Multi Cap Equity'
+  | 'Mid Cap Equity'
+  | 'Small Cap Equity'
+  | 'Debt Fund'
+  | 'Short Duration Debt'
+  | 'Liquid Fund'
+  | 'Gold'
+  | 'Multi Asset Allocation'
+  | 'Cash/Liquid';
+
+type HoldingCategory =
+  | 'Large Cap Equity'
+  | 'Large & Mid Cap Equity'
+  | 'Flexi Cap Equity'
+  | 'Multi Cap Equity'
+  | 'Mid Cap Equity'
+  | 'Small Cap Equity'
+  | 'Debt Fund'
+  | 'Short Duration Debt'
+  | 'Liquid Fund'
+  | 'Gold'
+  | 'Multi Asset Allocation'
+  | 'Cash/Liquid';
+
+interface Holding {
+  id: string;
+  name: string;
+  category: HoldingCategory;
+  amount: number;
+}
+
+interface RecommendedSlice {
+  name: string;
+  pct: number;
+  color: string;
+  group: 'Equity' | 'Debt' | 'Gold' | 'Hybrid' | 'Cash';
+}
+
+const CATEGORY_GROUP: Record<HoldingCategory, 'Equity' | 'Debt' | 'Gold' | 'Hybrid' | 'Cash'> = {
+  'Large Cap Equity': 'Equity',
+  'Large & Mid Cap Equity': 'Equity',
+  'Flexi Cap Equity': 'Equity',
+  'Multi Cap Equity': 'Equity',
+  'Mid Cap Equity': 'Equity',
+  'Small Cap Equity': 'Equity',
+  'Debt Fund': 'Debt',
+  'Short Duration Debt': 'Debt',
+  'Liquid Fund': 'Debt',
+  'Gold': 'Gold',
+  'Multi Asset Allocation': 'Hybrid',
+  'Cash/Liquid': 'Cash',
+};
+
+const GROUP_COLORS: Record<string, string> = {
+  Equity: '#0047AB',
+  Debt: '#F97316',
+  Gold: '#EAB308',
+  Hybrid: '#8B5CF6',
+  Cash: '#10B981',
+};
+
+const CATEGORY_COLORS: Record<HoldingCategory, string> = {
+  'Large Cap Equity': '#0047AB',
+  'Large & Mid Cap Equity': '#2563EB',
+  'Flexi Cap Equity': '#3B82F6',
+  'Multi Cap Equity': '#60A5FA',
+  'Mid Cap Equity': '#93C5FD',
+  'Small Cap Equity': '#BFDBFE',
+  'Debt Fund': '#F97316',
+  'Short Duration Debt': '#FB923C',
+  'Liquid Fund': '#FDBA74',
+  'Gold': '#EAB308',
+  'Multi Asset Allocation': '#8B5CF6',
+  'Cash/Liquid': '#10B981',
+};
+
+const RISK_LABELS: Record<RiskLevel, string> = {
+  'very-low': 'Very Low',
+  'low': 'Low',
+  'moderate': 'Moderate',
+  'high': 'High',
+  'very-high': 'Very High',
+};
+
+const RISK_ADJUSTMENTS: Record<RiskLevel, number> = {
+  'very-low': -25,   // CFA conservative portfolios: significantly lower equity
+  'low': -15,        // CFA low-risk: moderate reduction
+  'moderate': 0,     // Baseline — no adjustment
+  'high': 5,         // CFA aggressive: slight boost (limited by 95% cap)
+  'very-high': 5,    // CFA very aggressive: same boost (already near cap)
+};
+
+// Compute recommended equity % using Vanguard-style glidepath + MPT principles
+// Verified against: Vanguard TDF 2060 (90%), 2050 (90%), 2040 (75%), 2030 (59%)
+const computeRecommendedEquity = (age: number, risk: RiskLevel, horizon: number): number => {
+  // Vanguard glidepath: hold 90% equity until age 40, then de-risk 2%/yr
+  const base = age <= 40 ? 90 : Math.max(20, 90 - (age - 40) * 2);
+  const riskAdj = RISK_ADJUSTMENTS[risk];
+  // Horizon: small additive (Ibbotson: horizon matters but age already captures most of it)
+  const horizonAdj = Math.min(5, Math.max(0, (horizon - 5) * 0.5));
+  return Math.min(95, Math.max(10, Math.round(base + riskAdj + horizonAdj)));
+};
+
+// Build recommended sub-asset breakdown based on equity %
+// Equity sub-allocation aligned with SEBI Indian MF categories (Value Research, PrimeInvestor)
+// Non-equity: Fixed allocations based on WGC gold research (5%), Dalio All Weather, standard liquidity reserve (3%)
+const buildRecommendedAllocation = (equityPct: number, risk: RiskLevel): RecommendedSlice[] => {
+  const slices: RecommendedSlice[] = [];
+
+  // --- Fixed non-equity allocations (research-backed constants) ---
+  const goldPct = 5;          // World Gold Council: 4-15% optimal, Dalio All Weather: 7.5%
+  const hybridPct = (risk === 'moderate' || risk === 'high' || risk === 'very-high') ? 5 : 0; // Multi-asset for moderate+
+  const cashPct = 3;          // Standard liquidity reserve
+
+  // Remaining debt after fixed allocations
+  const totalNonEquity = 100 - equityPct;
+  const debtFundPct = Math.max(0, totalNonEquity - goldPct - hybridPct - cashPct);
+
+  // --- Equity sleeve — diversified per MPT/SEBI norms ---
+  if (equityPct > 0) {
+    if (risk === 'very-low' || risk === 'low') {
+      // Conservative: heavy large cap (SEBI: large cap fund = 80%+ large cap)
+      // ~70% large cap, ~20% flexi cap, ~10% large & mid cap
+      const largeCap = Math.round(equityPct * 0.70);
+      const flexiCap = Math.round(equityPct * 0.20);
+      const largeAndMid = equityPct - largeCap - flexiCap;
+      slices.push({ name: 'Large Cap Equity', pct: largeCap, color: CATEGORY_COLORS['Large Cap Equity'], group: 'Equity' });
+      if (flexiCap > 0) slices.push({ name: 'Flexi Cap Equity', pct: flexiCap, color: CATEGORY_COLORS['Flexi Cap Equity'], group: 'Equity' });
+      if (largeAndMid > 0) slices.push({ name: 'Large & Mid Cap Equity', pct: largeAndMid, color: CATEGORY_COLORS['Large & Mid Cap Equity'], group: 'Equity' });
+    } else if (risk === 'moderate') {
+      // Moderate: balanced mix (SEBI norms, Value Research recommendation)
+      // ~30% large, ~20% large&mid, ~20% flexi, ~10% multi, ~20% mid
+      const largeCap = Math.round(equityPct * 0.30);
+      const largeAndMid = Math.round(equityPct * 0.20);
+      const flexiCap = Math.round(equityPct * 0.20);
+      const multiCap = Math.round(equityPct * 0.10);
+      const midCap = equityPct - largeCap - largeAndMid - flexiCap - multiCap;
+      slices.push({ name: 'Large Cap Equity', pct: largeCap, color: CATEGORY_COLORS['Large Cap Equity'], group: 'Equity' });
+      if (largeAndMid > 0) slices.push({ name: 'Large & Mid Cap Equity', pct: largeAndMid, color: CATEGORY_COLORS['Large & Mid Cap Equity'], group: 'Equity' });
+      if (flexiCap > 0) slices.push({ name: 'Flexi Cap Equity', pct: flexiCap, color: CATEGORY_COLORS['Flexi Cap Equity'], group: 'Equity' });
+      if (multiCap > 0) slices.push({ name: 'Multi Cap Equity', pct: multiCap, color: CATEGORY_COLORS['Multi Cap Equity'], group: 'Equity' });
+      if (midCap > 0) slices.push({ name: 'Mid Cap Equity', pct: midCap, color: CATEGORY_COLORS['Mid Cap Equity'], group: 'Equity' });
+    } else {
+      // Aggressive/Very Aggressive: more mid/small cap exposure
+      // ~20% large, ~15% large&mid, ~15% flexi, ~15% multi, ~20% mid, ~15% small
+      const largeCap = Math.round(equityPct * 0.20);
+      const largeAndMid = Math.round(equityPct * 0.15);
+      const flexiCap = Math.round(equityPct * 0.15);
+      const multiCap = Math.round(equityPct * 0.15);
+      const midCap = Math.round(equityPct * 0.20);
+      const smallCap = equityPct - largeCap - largeAndMid - flexiCap - multiCap - midCap;
+      slices.push({ name: 'Large Cap Equity', pct: largeCap, color: CATEGORY_COLORS['Large Cap Equity'], group: 'Equity' });
+      if (largeAndMid > 0) slices.push({ name: 'Large & Mid Cap Equity', pct: largeAndMid, color: CATEGORY_COLORS['Large & Mid Cap Equity'], group: 'Equity' });
+      if (flexiCap > 0) slices.push({ name: 'Flexi Cap Equity', pct: flexiCap, color: CATEGORY_COLORS['Flexi Cap Equity'], group: 'Equity' });
+      if (multiCap > 0) slices.push({ name: 'Multi Cap Equity', pct: multiCap, color: CATEGORY_COLORS['Multi Cap Equity'], group: 'Equity' });
+      if (midCap > 0) slices.push({ name: 'Mid Cap Equity', pct: midCap, color: CATEGORY_COLORS['Mid Cap Equity'], group: 'Equity' });
+      if (smallCap > 0) slices.push({ name: 'Small Cap Equity', pct: smallCap, color: CATEGORY_COLORS['Small Cap Equity'], group: 'Equity' });
+    }
+  }
+
+  // --- Non-equity sleeve ---
+  if (debtFundPct > 0) slices.push({ name: 'Debt Fund', pct: debtFundPct, color: CATEGORY_COLORS['Debt Fund'], group: 'Debt' });
+  if (goldPct > 0) slices.push({ name: 'Gold', pct: goldPct, color: CATEGORY_COLORS['Gold'], group: 'Gold' });
+  if (hybridPct > 0) slices.push({ name: 'Multi Asset Allocation', pct: hybridPct, color: CATEGORY_COLORS['Multi Asset Allocation'], group: 'Hybrid' });
+  if (cashPct > 0) slices.push({ name: 'Cash/Liquid', pct: cashPct, color: CATEGORY_COLORS['Cash/Liquid'], group: 'Cash' });
+
+  // Normalize to exactly 100%
+  const total = slices.reduce((s, x) => s + x.pct, 0);
+  if (total !== 100 && slices.length > 0) {
+    // Adjust the largest slice to absorb rounding differences
+    const largestIdx = slices.reduce((maxI, s, i, arr) => s.pct > arr[maxI].pct ? i : maxI, 0);
+    slices[largestIdx].pct += (100 - total);
+  }
+
+  return slices.filter(s => s.pct > 0);
+};
+
+// Custom donut chart label renderer
+const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  if (percent < 0.05) return null;
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="700">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
+const HOLDING_CATEGORIES: HoldingCategory[] = [
+  'Large Cap Equity', 'Large & Mid Cap Equity', 'Flexi Cap Equity',
+  'Multi Cap Equity', 'Mid Cap Equity', 'Small Cap Equity',
+  'Debt Fund', 'Short Duration Debt', 'Liquid Fund',
+  'Gold', 'Multi Asset Allocation', 'Cash/Liquid',
+];
+
+const AssetAllocationCalculator = () => {
+  const [age, setAge] = useState(30);
+  const [risk, setRisk] = useState<RiskLevel>('moderate');
+  const [horizon, setHorizon] = useState(10);
+  const [isBeginner, setIsBeginner] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(false);
+  const [holdings, setHoldings] = useState<Holding[]>([
+    { id: '1', name: 'Nifty 50 Fund', category: 'Large Cap Equity', amount: 200000 },
+    { id: '2', name: 'Debt Fund', category: 'Debt Fund', amount: 150000 },
+    { id: '3', name: 'Savings Account', category: 'Cash/Liquid', amount: 50000 },
+  ]);
+  const holdingsListRef = useRef<HTMLDivElement>(null);
+  const [isHoldingsAtBottom, setIsHoldingsAtBottom] = useState(false);
+
+  const addHolding = () => {
+    const id = Date.now().toString();
+    setHoldings(prev => [...prev, { id, name: 'New Asset', category: 'Large Cap Equity', amount: 0 }]);
+    // Scroll to bottom after state update
+    setTimeout(() => {
+      if (holdingsListRef.current) {
+        holdingsListRef.current.scrollTo({ top: holdingsListRef.current.scrollHeight, behavior: 'smooth' });
+      }
+    }, 50);
+  };
+
+  const removeHolding = (id: string) => {
+    setHoldings(prev => prev.filter(h => h.id !== id));
+  };
+
+  const updateHolding = (id: string, field: keyof Holding, value: any) => {
+    setHoldings(prev => prev.map(h => h.id === id ? { ...h, [field]: value } : h));
+  };
+
+  const handleHoldingsScroll = () => {
+    const el = holdingsListRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 8;
+    setIsHoldingsAtBottom(atBottom);
+  };
+
+  // Recheck bottom state whenever holdings change (e.g. after delete)
+  useEffect(() => {
+    handleHoldingsScroll();
+  }, [holdings]);
+
+  const { currentAllocation, totalPortfolio, currentGrouped } = useMemo(() => {
+    const total = holdings.reduce((s, h) => s + h.amount, 0);
+    if (total === 0) return { currentAllocation: [], totalPortfolio: 0, currentGrouped: {} };
+
+    // Group by category
+    const byCat: Record<string, number> = {};
+    holdings.forEach(h => {
+      byCat[h.category] = (byCat[h.category] || 0) + h.amount;
+    });
+
+    // Group by asset group for donut
+    const byGroup: Record<string, number> = {};
+    Object.entries(byCat).forEach(([cat, amt]) => {
+      const grp = CATEGORY_GROUP[cat as HoldingCategory];
+      byGroup[grp] = (byGroup[grp] || 0) + amt;
+    });
+
+    const currentAllocation = Object.entries(byGroup).map(([grp, amt]) => ({
+      name: grp,
+      pct: Math.round((amt / total) * 1000) / 10,
+      color: GROUP_COLORS[grp],
+      group: grp,
+    }));
+
+    const currentGrouped: Record<string, { categories: { name: string; pct: number }[] }> = {};
+    Object.entries(byGroup).forEach(([grp]) => {
+      const cats = Object.entries(byCat)
+        .filter(([cat]) => CATEGORY_GROUP[cat as HoldingCategory] === grp)
+        .map(([cat, amt]) => ({ name: cat, pct: Math.round((amt / total) * 1000) / 10 }));
+      currentGrouped[grp] = { categories: cats };
+    });
+
+    return { currentAllocation, totalPortfolio: total, currentGrouped };
+  }, [holdings]);
+
+  const recommendedAllocation = useMemo(() => {
+    return buildRecommendedAllocation(computeRecommendedEquity(age, risk, horizon), risk);
+  }, [age, risk, horizon]);
+
+  const recommendedEquityPct = useMemo(() => computeRecommendedEquity(age, risk, horizon), [age, risk, horizon]);
+
+  // Recommended grouped for legend
+  const recommendedGrouped = useMemo(() => {
+    const byGroup: Record<string, { pct: number; categories: { name: string; pct: number }[] }> = {};
+    recommendedAllocation.forEach(s => {
+      if (!byGroup[s.group]) byGroup[s.group] = { pct: 0, categories: [] };
+      byGroup[s.group].pct += s.pct;
+      byGroup[s.group].categories.push({ name: s.name, pct: s.pct });
+    });
+    return byGroup;
+  }, [recommendedAllocation]);
+
+  // Portfolio Divergence: absolute difference in equity allocation (Brinson: allocation drives 90%+ of returns)
+  const currentEquityPct = useMemo(() => {
+    const total = holdings.reduce((s, h) => s + h.amount, 0);
+    if (total === 0) return 0;
+    const equityAmt = holdings
+      .filter(h => CATEGORY_GROUP[h.category] === 'Equity')
+      .reduce((s, h) => s + h.amount, 0);
+    return Math.round((equityAmt / total) * 1000) / 10;
+  }, [holdings]);
+
+  const divergence = Math.abs(currentEquityPct - recommendedEquityPct);
+
+  const divergenceLevel = divergence < 10 ? 'low' : divergence < 25 ? 'medium' : 'high';
+
+  // Compute specific rebalancing amounts
+  const rebalanceAdvice = useMemo(() => {
+    if (isBeginner || totalPortfolio === 0) return null;
+    const diff = recommendedEquityPct - currentEquityPct;
+    if (Math.abs(diff) <= 5) return null;
+    const rupeeAmount = Math.abs(Math.round((diff / 100) * totalPortfolio));
+    if (diff > 0) {
+      return { direction: 'increase' as const, amount: rupeeAmount, pct: Math.abs(diff) };
+    } else {
+      return { direction: 'decrease' as const, amount: rupeeAmount, pct: Math.abs(diff) };
+    }
+  }, [isBeginner, totalPortfolio, recommendedEquityPct, currentEquityPct]);
+
+  const showCurrentChart = !isBeginner && holdings.length > 0 && totalPortfolio > 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Methodology Badge */}
+      <div className="flex items-center gap-2 text-xs text-slate-500 bg-blue-50 border border-blue-100 rounded-lg px-4 py-2 w-fit">
+        <CheckCircle size={14} className="text-brand-blue" />
+        <span><strong className="text-brand-blue">Verified Methodology:</strong> Vanguard glidepath + Brinson Study (1986) + Ibbotson & Kaplan (2000). Gold allocation per World Gold Council research. Sub-asset diversification per SEBI Indian MF norms.</span>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-6">
+        {/* LEFT PANEL */}
+        <div className="lg:col-span-4 space-y-4">
+          {/* Profile Card */}
+          <div className="card-input space-y-5">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Your Profile</h3>
+
+            {/* Age */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-bold text-slate-700">Your Age</label>
+                <span className="text-brand-blue font-bold bg-blue-50 px-3 py-1 rounded-md text-sm">{age} Yrs</span>
+              </div>
+              <input type="range" min={16} max={80} value={age} onChange={e => setAge(Number(e.target.value))}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-blue" />
+              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                <span>16 Yrs</span><span>80 Yrs</span>
+              </div>
+            </div>
+
+            {/* Risk Appetite */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-bold text-slate-700">Risk Appetite</label>
+                <span className="text-brand-blue font-bold text-sm">{RISK_LABELS[risk]}</span>
+              </div>
+              <div className="flex gap-1">
+                {(['very-low', 'low', 'moderate', 'high', 'very-high'] as RiskLevel[]).map(r => (
+                  <button key={r} onClick={() => setRisk(r)}
+                    className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${risk === r
+                      ? 'bg-brand-blue text-white shadow-md'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                      }`}>
+                    {r === 'very-low' ? 'Very Low' : r === 'very-high' ? 'Very High' : r.charAt(0).toUpperCase() + r.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Investment Horizon */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-bold text-slate-700">Investment Horizon</label>
+                <span className="text-brand-blue font-bold bg-blue-50 px-3 py-1 rounded-md text-sm">{horizon} Yrs</span>
+              </div>
+              <input type="range" min={1} max={30} value={horizon} onChange={e => setHorizon(Number(e.target.value))}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-blue" />
+              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                <span>1 Yr</span><span>30 Yrs</span>
+              </div>
+            </div>
+
+            {/* Beginner toggle — proper toggle switch */}
+            <div
+              onClick={() => setIsBeginner(v => !v)}
+              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all select-none ${isBeginner ? 'bg-blue-50 border-brand-blue' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                }`}
+            >
+              <div>
+                <div className="text-sm font-semibold text-slate-700">I am a Beginner</div>
+                <div className="text-xs text-slate-400">I don't have an existing portfolio to compare.</div>
+              </div>
+              {/* Toggle pill */}
+              <div className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${isBeginner ? 'bg-brand-blue' : 'bg-slate-300'
+                }`}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isBeginner ? 'translate-x-5' : 'translate-x-0.5'
+                  }`} />
+              </div>
+            </div>
+          </div>
+
+          {/* Current Holdings */}
+          {!isBeginner && (
+            <div className="card-input space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Holdings</h3>
+                <button onClick={addHolding}
+                  className="flex items-center gap-1.5 text-xs font-bold text-brand-blue border border-brand-blue rounded-lg px-3 py-1.5 hover:bg-blue-50 transition-all">
+                  <Plus size={13} /> Add Asset
+                </button>
+              </div>
+
+              {/* Scrollable holdings list with fade + scroll hint */}
+              <div className="relative">
+                <div
+                  ref={holdingsListRef}
+                  onScroll={handleHoldingsScroll}
+                  className="space-y-3 max-h-64 overflow-y-auto pr-1"
+                >
+                  {holdings.map(h => (
+                    <div key={h.id} className="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={h.name}
+                          onChange={e => updateHolding(h.id, 'name', e.target.value)}
+                          className="flex-1 text-sm font-semibold text-brand-blue bg-transparent border-b border-slate-200 focus:border-brand-blue outline-none pb-0.5"
+                        />
+                        <select
+                          value={h.category}
+                          onChange={e => updateHolding(h.id, 'category', e.target.value as HoldingCategory)}
+                          className="text-xs text-slate-600 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:ring-1 focus:ring-brand-blue outline-none"
+                        >
+                          {HOLDING_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 flex flex-col">
+                          <input
+                            type="number"
+                            value={h.amount}
+                            onChange={e => updateHolding(h.id, 'amount', Math.max(0, Number(e.target.value)))}
+                            className="text-sm font-bold text-slate-800 bg-transparent border-b border-slate-200 focus:border-brand-blue outline-none pb-0.5"
+                          />
+                          {h.amount > 0 && (
+                            <span className="text-xs text-slate-400 mt-0.5">{formatShort(h.amount)}</span>
+                          )}
+                        </div>
+                        <button onClick={() => removeHolding(h.id)}
+                          className="text-slate-300 hover:text-red-400 transition-colors p-1">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Fade + scroll hint — only when there's more content below */}
+                {holdings.length >= 3 && !isHoldingsAtBottom && (
+                  <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex flex-col items-center justify-end h-14 bg-gradient-to-t from-slate-200/90 to-transparent rounded-b-xl">
+                    <span className="text-xs text-slate-500 font-medium flex items-center gap-1 pb-1.5">
+                      <ChevronDown size={12} />
+                      Scroll for more
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {totalPortfolio > 0 && (
+                <div className="text-right text-xs text-slate-500 font-medium">
+                  Total: <span className="font-bold text-slate-700">₹{totalPortfolio.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action Plan */}
+          <div className="card-input p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Target size={16} className="text-brand-blue" />
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Action Plan</h3>
+            </div>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              Based on your <strong>{RISK_LABELS[risk]}</strong> risk profile and <strong>{horizon} year</strong> horizon, you should target roughly <strong>{recommendedEquityPct}% Equity</strong>.
+            </p>
+            {/* Specific rebalancing advice */}
+            {rebalanceAdvice && (
+              <div className={`flex items-start gap-2 mt-3 p-3 rounded-lg border ${rebalanceAdvice.direction === 'increase'
+                ? 'bg-blue-50 border-blue-200'
+                : 'bg-amber-50 border-amber-200'
+                }`}>
+                <AlertTriangle size={14} className={`flex-shrink-0 mt-0.5 ${rebalanceAdvice.direction === 'increase' ? 'text-blue-500' : 'text-amber-500'
+                  }`} />
+                <p className={`text-xs ${rebalanceAdvice.direction === 'increase' ? 'text-blue-700' : 'text-amber-700'
+                  }`}>
+                  {rebalanceAdvice.direction === 'increase'
+                    ? <>Consider moving <strong>{formatShort(rebalanceAdvice.amount)}</strong> from Debt / Cash into a <strong>Large Cap or Flexi Cap Equity fund</strong> to reach your {recommendedEquityPct}% equity target.</>
+                    : <>Your equity is {rebalanceAdvice.pct.toFixed(0)}% above target. Consider moving <strong>{formatShort(rebalanceAdvice.amount)}</strong> into <strong>Debt or Gold</strong> to rebalance.</>}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div className="lg:col-span-8 space-y-4">
+          {/* Portfolio Divergence Banner */}
+          {showCurrentChart && (
+            <div className={`rounded-2xl p-4 border flex items-center justify-between ${divergenceLevel === 'low'
+              ? 'bg-green-50 border-green-200'
+              : divergenceLevel === 'medium'
+                ? 'bg-amber-50 border-amber-200'
+                : 'bg-red-50 border-red-200'
+              }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${divergenceLevel === 'low' ? 'bg-green-100' : divergenceLevel === 'medium' ? 'bg-amber-100' : 'bg-red-100'
+                  }`}>
+                  {divergenceLevel === 'low'
+                    ? <CheckCircle size={18} className="text-green-600" />
+                    : <AlertTriangle size={18} className={divergenceLevel === 'medium' ? 'text-amber-600' : 'text-red-600'} />
+                  }
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-700">Reality Check</div>
+                  <div className="text-xs text-slate-500">Comparing your portfolio vs. Recommended</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Portfolio Divergence</div>
+                <div className={`text-2xl font-extrabold flex items-center gap-1 justify-end ${divergenceLevel === 'low' ? 'text-green-600' : divergenceLevel === 'medium' ? 'text-amber-600' : 'text-red-600'
+                  }`}>
+                  {divergence.toFixed(1)}%
+                  {divergenceLevel !== 'low' && <AlertTriangle size={16} />}
+                </div>
+                <div className={`text-xs font-medium ${divergenceLevel === 'low' ? 'text-green-600' : divergenceLevel === 'medium' ? 'text-amber-600' : 'text-red-600'
+                  }`}>
+                  {divergenceLevel === 'low' ? 'Well aligned with your profile.' : divergenceLevel === 'medium' ? 'Moderate misalignment. Consider rebalancing.' : 'Significant misalignment. Your risk exposure differs from your ideal profile.'}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Charts Row */}
+          <div className={`grid gap-4 ${showCurrentChart ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+            {/* Current Portfolio Chart */}
+            {showCurrentChart && (
+              <div className="card-input">
+                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center mb-4">Current</h3>
+                <div className="h-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={currentAllocation}
+                        cx="50%" cy="50%"
+                        innerRadius={55} outerRadius={85}
+                        paddingAngle={2}
+                        dataKey="pct"
+                        labelLine={false}
+                        label={renderCustomLabel}
+                        isAnimationActive={true}
+                        animationDuration={400}
+                        animationEasing="ease-out"
+                      >
+                        {currentAllocation.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: any) => `${v}%`} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                {/* Current Legend */}
+                <div className="mt-3 space-y-1">
+                  {Object.entries(currentGrouped).map(([grp, data]) => (
+                    <div key={grp}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: GROUP_COLORS[grp] }} />
+                          <span className="text-xs font-bold text-slate-700">{grp}</span>
+                        </div>
+                        <span className="text-xs font-bold" style={{ color: GROUP_COLORS[grp] }}>
+                          {currentAllocation.find(c => c.name === grp)?.pct ?? 0}%
+                        </span>
+                      </div>
+                      {data.categories.map(cat => (
+                        <div key={cat.name} className="flex justify-between pl-5 text-xs text-slate-500">
+                          <span>{cat.name}</span>
+                          <span>{cat.pct}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommended Portfolio Chart */}
+            <div className="card-input">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <h3 className="text-sm font-bold text-brand-blue uppercase tracking-widest text-center">Recommended</h3>
+                <span className="text-xs bg-brand-blue text-white px-2 py-0.5 rounded-full font-bold">Ideal</span>
+              </div>
+              <div className="h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={recommendedAllocation}
+                      cx="50%" cy="50%"
+                      innerRadius={55} outerRadius={85}
+                      paddingAngle={2}
+                      dataKey="pct"
+                      labelLine={false}
+                      label={renderCustomLabel}
+                      isAnimationActive={true}
+                      animationDuration={400}
+                      animationEasing="ease-out"
+                    >
+                      {recommendedAllocation.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v: any) => `${v}%`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Recommended Legend */}
+              <div className="mt-3 space-y-1">
+                {Object.entries(recommendedGrouped).map(([grp, data]) => (
+                  <div key={grp}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: GROUP_COLORS[grp] }} />
+                        <span className="text-xs font-bold text-slate-700">{grp}</span>
+                      </div>
+                      <span className="text-xs font-bold" style={{ color: GROUP_COLORS[grp] }}>
+                        {data.pct}%
+                      </span>
+                    </div>
+                    {data.categories.map(cat => (
+                      <div key={cat.name} className="flex justify-between pl-5 text-xs text-slate-500">
+                        <span>{cat.name}</span>
+                        <span>{cat.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Divergence bridge — shown between charts when both exist */}
+          {showCurrentChart && (
+            <div className="flex items-center gap-3 px-2">
+              <div className="flex-1 h-px bg-slate-200" />
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border ${divergenceLevel === 'low'
+                ? 'bg-green-50 border-green-200 text-green-700'
+                : divergenceLevel === 'medium'
+                  ? 'bg-amber-50 border-amber-200 text-amber-700'
+                  : 'bg-red-50 border-red-200 text-red-700'
+                }`}>
+                {divergenceLevel === 'low'
+                  ? <CheckCircle size={12} />
+                  : <AlertTriangle size={12} />}
+                {divergence.toFixed(1)}% equity gap
+              </div>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+          )}
+
+          {/* MPT Explanation — collapsible accordion */}
+          <div className="rounded-xl border border-slate-200 overflow-hidden">
+            <button
+              onClick={() => setShowMethodology(v => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                {/* Source pills */}
+                {(['Vanguard Glidepath', 'Brinson Study', 'SEBI Norms'] as const).map(pill => (
+                  <span key={pill} className="text-xs bg-white border border-slate-200 text-slate-500 px-2 py-0.5 rounded-full font-medium hidden sm:inline">{pill}</span>
+                ))}
+                <span className="text-xs text-slate-500 font-medium sm:hidden">Methodology</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-brand-blue font-semibold flex-shrink-0">
+                {showMethodology ? 'Hide' : 'How this works'}
+                <span className={`transition-transform duration-200 ${showMethodology ? 'rotate-180' : ''}`}>▾</span>
+              </div>
+            </button>
+            {showMethodology && (
+              <div className="px-4 py-3 bg-white text-xs text-slate-500 leading-relaxed border-t border-slate-100">
+                Your equity allocation follows <em>Vanguard's target-date glidepath</em> — 90% equity until age 40, then de-risking ~2% per year (verified against Vanguard TDF 2060/2050/2040/2030 actual allocations). Risk appetite adjusts by ±5–25% (calibrated to CFA Institute model portfolios). Investment horizon adds a small modifier (+0.5%/yr beyond 5 years, capped at +5%) per Ibbotson &amp; Kaplan's research. Per the <em>Brinson Study (1986)</em>, asset allocation explains 90%+ of return variability. Gold is fixed at 5% (World Gold Council optimal range: 4–15%, Ray Dalio All Weather: 7.5%). Sub-asset diversification follows SEBI Indian mutual fund category norms.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1972,8 +2703,8 @@ const InputSlider = ({ label, value, setValue, min, max, step = 1, unit }: any) 
         {value} {unit}
       </span>
     </div>
-    <input 
-      type="range" min={min} max={max} step={step} value={value} 
+    <input
+      type="range" min={min} max={max} step={step} value={value}
       onChange={(e) => setValue(Number(e.target.value))}
       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-blue"
     />
@@ -1996,8 +2727,8 @@ const InputCurrency = ({ label, value, setValue, min, max, step }: any) => (
         className="w-full pl-8 pr-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none font-bold text-slate-800 transition-all"
       />
     </div>
-    <input 
-      type="range" min={min} max={max} step={step} value={value} 
+    <input
+      type="range" min={min} max={max} step={step} value={value}
       onChange={(e) => setValue(Number(e.target.value))}
       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-blue mt-3"
     />

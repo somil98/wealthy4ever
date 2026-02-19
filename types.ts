@@ -11,6 +11,7 @@ export interface ChartDataPoint {
 
 export type CalculatorTab = 
   | 'risk-profile' 
+  | 'asset-allocation'
   | 'sip' 
   | 'lumpsum' 
   | 'retirement-accum' 
